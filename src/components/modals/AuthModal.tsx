@@ -88,8 +88,8 @@ export const AuthModal: React.FC = () => {
             </div>
             <div>
               <span className="font-extrabold text-xl tracking-tight text-white">Cimpres</span>
-              <span className="ml-2 text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
-                Cash Flow & CRM
+              <span className="ml-2 text-xs font-black px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                100% Free Forever
               </span>
             </div>
           </div>
@@ -97,12 +97,12 @@ export const AuthModal: React.FC = () => {
           <h2 className="text-2xl font-black tracking-tight text-white mb-2">
             {authModalMode === 'login'
               ? 'Welcome back to your financial cockpit'
-              : 'Start your 14-day free trial'}
+              : 'Create your 100% free account'}
           </h2>
           <p className="text-sm text-slate-300">
             {authModalMode === 'login'
-              ? 'Access real-time 7-account cash flow, client pipeline, and automated invoicing.'
-              : 'Zero setup fees. Automate your cash flow distribution in under 3 minutes.'}
+              ? 'Access real-time 7-account cash flow, automated invoicing, and profit allocations.'
+              : '100% free for everyone. No credit card, no subscription fees, no limits.'}
           </p>
 
           {/* Tab Switcher */}
@@ -326,11 +326,11 @@ export const AuthModal: React.FC = () => {
               <div className="space-y-1.5 pt-1">
                 <div className="flex items-center gap-2 text-xs text-slate-600">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>14-day free Pro access — no credit card required</span>
+                  <span>100% Free forever — no credit card ever required</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-slate-600">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Pre-configured with Cimpres 7-Account Formula</span>
+                  <span>Full access to the Cimpres 7-Account Formula</span>
                 </div>
               </div>
 
@@ -339,7 +339,7 @@ export const AuthModal: React.FC = () => {
                 className="w-full mt-2 py-3 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 active:scale-[0.99] text-white font-bold text-sm shadow-md shadow-blue-600/25 flex items-center justify-center gap-2 transition cursor-pointer"
                 id="auth-btn-signup-submit"
               >
-                <span>Activate Free Trial & Enter Cockpit</span>
+                <span>Activate Free Workspace & Enter Cockpit</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </form>
@@ -351,7 +351,7 @@ export const AuthModal: React.FC = () => {
               <ShieldCheck className="w-4 h-4 text-emerald-600" />
               <span>SOC2 & 256-Bit Financial Encryption</span>
             </div>
-            <span>Cancel anytime</span>
+            <span className="text-emerald-600 font-bold">100% Free Forever</span>
           </div>
         </div>
       </div>

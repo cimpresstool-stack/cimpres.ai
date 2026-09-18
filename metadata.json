@@ -1,6 +1,6 @@
 {
   "name": "Cimpres CRM & Cash Flow Engine",
-  "description": "Unified CRM and 7-account cash flow management with automated invoicing, client tracking, pipeline management, and real-time financial reporting.",
+  "description": "Free 7-account cash flow management with automated profit distribution, invoicing, and real-time financial reporting for everyone.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

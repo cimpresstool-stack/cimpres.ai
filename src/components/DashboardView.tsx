@@ -43,7 +43,6 @@ export const DashboardView: React.FC = () => {
     setActiveTab,
     setIsCashInModalOpen,
     setIsNewInvoiceModalOpen,
-    setIsNewDealModalOpen,
     setPreviewInvoice,
     adjustAccountBalance,
   } = useApp();
@@ -66,12 +65,6 @@ export const DashboardView: React.FC = () => {
   const salBalance = state.balances.S || 0;
   const salTarget = state.settings.monthlyPayrollTarget || 14000;
   const salPct = Math.min(100, Math.round((salBalance / salTarget) * 100));
-
-  // CRM numbers
-  const openDeals = state.deals.filter((d) => d.stage !== 'won' && d.stage !== 'lost');
-  const totalPipelineValue = openDeals.reduce((sum, d) => sum + d.value, 0);
-  const wonDealsThisMonth = state.deals.filter((d) => d.stage === 'won');
-  const wonAmount = wonDealsThisMonth.reduce((sum, d) => sum + d.value, 0);
 
   const pendingInvoices = state.invoices.filter((i) => i.status === 'sent');
   const pendingAmount = pendingInvoices.reduce((sum, i) => sum + i.total, 0);
@@ -98,15 +91,15 @@ export const DashboardView: React.FC = () => {
       {/* Welcome Banner & Overview Header */}
       <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 rounded-2xl p-6 text-white shadow-md relative overflow-hidden">
         <div className="relative z-10 max-w-3xl">
-          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-semibold mb-3 border border-blue-400/30">
-            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-            CRM & Cash Flow Engine Operating in Real-Time
+          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold mb-3 border border-emerald-400/30">
+            <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+            100% Free 7-Account Cash Flow Engine • Active
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mb-2">
-            Every deal closed feeds your 7 accounts automatically.
+            Every dollar collected feeds your 7 accounts automatically.
           </h2>
           <p className="text-slate-300 text-sm sm:text-base leading-relaxed mb-5">
-            Rent reserved daily. Payroll secured before month-end. Profit ring-fenced first. When a client pays an invoice, the CIMPRES algorithm routes each dollar where it belongs in under a second.
+            Rent reserved daily. Payroll secured before month-end. Profit ring-fenced first. When cash arrives, the Cimpres algorithm routes each dollar where it belongs in under a second.
           </p>
           <div className="flex flex-wrap items-center gap-3">
             <button
@@ -123,13 +116,13 @@ export const DashboardView: React.FC = () => {
               id="dash-create-invoice-btn"
             >
               <Receipt className="w-4 h-4 text-blue-400" />
-              <span>Automate New Invoice</span>
+              <span>New Invoice</span>
             </button>
             <button
-              onClick={() => setActiveTab('pipeline')}
+              onClick={() => setActiveTab('accounts')}
               className="px-4 py-2.5 rounded-xl bg-transparent hover:bg-white/5 text-slate-300 hover:text-white font-medium text-sm transition flex items-center gap-1 cursor-pointer"
             >
-              <span>View Deals Pipeline</span>
+              <span>7 Accounts Breakdown</span>
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
@@ -222,34 +215,8 @@ export const DashboardView: React.FC = () => {
         </div>
       </div>
 
-      {/* CRM & Pipeline Quick Counters */}
+      {/* Financial Health & Invoicing Quick Counters */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div
-          onClick={() => setActiveTab('pipeline')}
-          className="p-4 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition cursor-pointer"
-        >
-          <span className="text-xs text-slate-500 font-medium block">Active Pipeline</span>
-          <div className="text-lg sm:text-xl font-bold text-slate-900 mt-0.5">
-            {formatCurrency(totalPipelineValue, state.settings.currency)}
-          </div>
-          <span className="text-xs text-blue-600 font-semibold">
-            {openDeals.length} deals in motion →
-          </span>
-        </div>
-
-        <div
-          onClick={() => setActiveTab('pipeline')}
-          className="p-4 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition cursor-pointer"
-        >
-          <span className="text-xs text-slate-500 font-medium block">Deals Won</span>
-          <div className="text-lg sm:text-xl font-bold text-emerald-700 mt-0.5">
-            {formatCurrency(wonAmount, state.settings.currency)}
-          </div>
-          <span className="text-xs text-emerald-700 font-semibold">
-            {wonDealsThisMonth.length} closed & funded
-          </span>
-        </div>
-
         <div
           onClick={() => setActiveTab('invoices')}
           className="p-4 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition cursor-pointer"
@@ -259,20 +226,49 @@ export const DashboardView: React.FC = () => {
             {formatCurrency(pendingAmount, state.settings.currency)}
           </div>
           <span className="text-xs text-amber-700 font-semibold">
-            {pendingInvoices.length} awaiting settlement
+            {pendingInvoices.length} awaiting settlement →
           </span>
         </div>
 
         <div
-          onClick={() => setActiveTab('clients')}
+          onClick={() => setActiveTab('accounts')}
           className="p-4 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition cursor-pointer"
         >
-          <span className="text-xs text-slate-500 font-medium block">Active Clients</span>
-          <div className="text-lg sm:text-xl font-bold text-slate-900 mt-0.5">
-            {state.contacts.length} Records
+          <span className="text-xs text-slate-500 font-medium block">Liquid Reserves</span>
+          <div className="text-lg sm:text-xl font-bold text-emerald-700 mt-0.5">
+            {formatCurrency(
+              (state.balances.P || 0) + (state.balances.E || 0) + (state.balances.C || 0),
+              state.settings.currency
+            )}
           </div>
-          <span className="text-xs text-slate-600 font-semibold">
-            {state.contacts.filter((c) => c.type === 'vip').length} VIP partners
+          <span className="text-xs text-emerald-700 font-semibold">
+            Profit + Daily + Buffer →
+          </span>
+        </div>
+
+        <div
+          onClick={() => setActiveTab('reports')}
+          className="p-4 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition cursor-pointer"
+        >
+          <span className="text-xs text-slate-500 font-medium block">Ledger Volume</span>
+          <div className="text-lg sm:text-xl font-bold text-slate-900 mt-0.5">
+            {state.transactions.length} Entries
+          </div>
+          <span className="text-xs text-blue-600 font-semibold">
+            Automated journal history →
+          </span>
+        </div>
+
+        <div
+          onClick={() => setActiveTab('settings')}
+          className="p-4 rounded-xl bg-emerald-50/60 hover:bg-emerald-100/60 border border-emerald-200/80 transition cursor-pointer"
+        >
+          <span className="text-xs text-emerald-800 font-bold block">License Status</span>
+          <div className="text-lg sm:text-xl font-black text-emerald-900 mt-0.5">
+            100% Free
+          </div>
+          <span className="text-xs text-emerald-700 font-semibold">
+            Full lifetime access unlocked ✓
           </span>
         </div>
       </div>

@@ -4,22 +4,16 @@ import {
   ArrowDownRight,
   PieChart,
   BarChart3,
-  Users,
-  KanbanSquare,
   Receipt,
   Link2,
-  CheckSquare,
-  FileText,
-  Mail,
-  Zap,
   Settings,
-  Sparkles,
   RotateCcw,
   ShieldCheck,
   Building2,
   ChevronRight,
   Globe,
   LogOut,
+  Sparkles,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { formatCompactCurrency } from '../data/constants';
@@ -51,10 +45,7 @@ export const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
     logout,
   } = useApp();
 
-  const openTasksCount = state.tasks.filter((t) => !t.done).length;
   const pendingInvoicesCount = state.invoices.filter((i) => i.status === 'sent').length;
-  const activeDealsCount = state.deals.filter((d) => d.stage !== 'won' && d.stage !== 'lost').length;
-  const unreadEmailsCount = state.emails.filter((e) => e.unread).length;
 
   const sections: NavSection[] = [
     {
@@ -67,34 +58,7 @@ export const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
       ],
     },
     {
-      title: 'CRM & Client Tracking',
-      items: [
-        {
-          id: 'clients',
-          label: 'Client Directory',
-          icon: Users,
-          badge: state.contacts.length,
-          badgeColor: 'bg-slate-100 text-slate-700',
-        },
-        {
-          id: 'pipeline',
-          label: 'Sales Pipeline',
-          icon: KanbanSquare,
-          badge: activeDealsCount,
-          badgeColor: 'bg-blue-100 text-blue-700',
-        },
-        { id: 'quotes', label: 'Quotes & Proposals', icon: FileText },
-        {
-          id: 'tasks',
-          label: 'Tasks & Activities',
-          icon: CheckSquare,
-          badge: openTasksCount > 0 ? openTasksCount : undefined,
-          badgeColor: 'bg-amber-100 text-amber-800',
-        },
-      ],
-    },
-    {
-      title: 'Automated Invoicing',
+      title: 'Invoicing & Payments',
       items: [
         {
           id: 'invoices',
@@ -107,16 +71,9 @@ export const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
       ],
     },
     {
-      title: 'Automation & Comms',
+      title: 'Configuration',
       items: [
-        {
-          id: 'communications',
-          label: 'Messages & Campaigns',
-          icon: Mail,
-          badge: unreadEmailsCount > 0 ? `${unreadEmailsCount} new` : undefined,
-          badgeColor: 'bg-indigo-100 text-indigo-700',
-        },
-        { id: 'settings', label: 'Rules & Settings', icon: Settings },
+        { id: 'settings', label: 'Rules & Percentage Settings', icon: Settings },
       ],
     },
   ];
@@ -146,11 +103,11 @@ export const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-extrabold text-white tracking-tight text-lg">Cimpres</span>
-                <span className="text-xs font-bold px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">
-                  CRM+OS
+                <span className="text-xs font-black px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                  100% FREE
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400 font-medium">Cash Flow & Business Tool</p>
+              <p className="text-[11px] text-slate-400 font-medium">7-Account Cash Flow OS</p>
             </div>
           </div>
         </div>
@@ -278,7 +235,7 @@ export const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
 
           <div className="text-[11px] text-slate-400 text-center flex items-center justify-center gap-1">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 inline" />
-            <span>Encrypted Local Persistence</span>
+            <span>100% Free Forever • Local Persistence</span>
           </div>
         </div>
       </aside>

@@ -22,6 +22,8 @@ import {
   Clock,
   Briefcase,
   Play,
+  CreditCard,
+  Link2,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { ACCOUNTS, formatCurrency, formatCompactCurrency } from '../../data/constants';
@@ -48,7 +50,7 @@ export const LandingPage: React.FC = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   // Active feature tab
-  const [activeFeatureTab, setActiveFeatureTab] = useState<'distribution' | 'invoicing' | 'crm' | 'reporting'>('distribution');
+  const [activeFeatureTab, setActiveFeatureTab] = useState<'distribution' | 'invoicing' | 'paylinks' | 'reporting'>('distribution');
 
   const handleAmountSelect = (val: number) => {
     setSimulatorAmount(val);
@@ -81,44 +83,44 @@ export const LandingPage: React.FC = () => {
 
   const faqs = [
     {
+      q: 'Why is Cimpres 100% free for everyone?',
+      a: 'We believe every founder and business owner deserves financial clarity and discipline without paying $100s/month in recurring SaaS subscription fees. Cimpres is completely free forever. There are no trials, no credit card requirements, and no artificial paywalls.',
+    },
+    {
       q: 'How is Cimpres different from traditional accounting tools like QuickBooks or Xero?',
-      a: 'Traditional accounting tools are backward-looking ledgers that record what already happened weeks ago. Cimpres is a forward-operating financial engine. The moment an invoice is paid or cash is recorded, Cimpres automatically splits the money into 7 dedicated reserves (Profit, Payroll, Rent, Input Costs, Marketing, Overhead, Cash-In). This prevents cash-flow illusions and ensures you never accidentally spend payroll or tax money on daily expenses.',
+      a: 'Traditional accounting tools are backward-looking ledgers that record what already happened weeks ago. Cimpres is a forward-operating financial engine. The moment cash arrives or an invoice is settled, Cimpres automatically splits the money into 7 dedicated reserves (Profit, Payroll, Rent, Input Costs, Marketing, Overhead, Cash-In). This prevents cash-flow illusions and ensures you never accidentally spend payroll or tax money on daily expenses.',
     },
     {
       q: 'Can our business customize the 7 allocation accounts and percentage splits?',
       a: 'Yes! While the Cimpres default formula (20% Profit, 25% Payroll, 25% Input Costs, 10% Marketing, 10% Overhead, 5% Rent, 5% Clearing) is mathematically optimized for high-growth service agencies and B2B firms, you can adjust targets and percentage allocations in your Settings anytime.',
     },
     {
-      q: 'What happens automatically when we mark a Deal as "Won" in the CRM?',
-      a: 'Cimpres features native Deal-to-Cash automation. When you move any deal to the "Won" column in the Sales Pipeline, the system automatically creates an itemized invoice, generates a unique secure online payment link, and prompts you to notify the client. Once paid, the payment is automatically distributed across your 7 accounts without manual spreadsheet entry.',
+      q: 'How does automated invoicing and instant payment collection work?',
+      a: 'You can generate professional itemized invoices in seconds and send one-click shareable payment links to your clients via Email, SMS, or WhatsApp. When an invoice is paid, Cimpres logs the transaction and automatically splits the funds into your 7 reserve accounts.',
     },
     {
-      q: 'How does 30/60/90-day predictive cash flow forecasting work?',
-      a: 'Cimpres combines your current liquid reserves across all 7 accounts with your active pipeline deals, weighted by their stage close probabilities (e.g. 75% for negotiation, 50% for proposals) and expected close dates. This gives you an accurate forward-looking projection of your cash runway.',
+      q: 'Do I need to enter credit card details to start or test drive?',
+      a: 'No credit card is required. You can either create a free account with your email or click "Instant Demo Access" to immediately test drive the full system loaded with realistic ledger balances, invoices, and allocation records.',
     },
     {
-      q: 'Do I need to enter credit card details to start a free trial or test drive?',
-      a: 'No credit card is required. You can either create a free account with your email or click "Instant Demo Access" to immediately test drive the full system loaded with realistic client deals, invoices, and cash ledger records.',
-    },
-    {
-      q: 'Is our financial and client data secure?',
-      a: 'Yes. All data is protected with enterprise-grade AES-256 encryption. We adhere to SOC2 security principles, and your records persist securely in your dedicated environment.',
+      q: 'Is our financial data private and secure?',
+      a: 'Yes. All data is protected with enterprise-grade AES-256 local and cloud encryption. We adhere to SOC2 security principles, and your records persist securely in your dedicated environment.',
     },
   ];
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 font-sans selection:bg-blue-600 selection:text-white">
       {/* 1. TOP ANNOUNCEMENT BANNER */}
-      <div className="bg-gradient-to-r from-blue-700 via-indigo-700 to-blue-800 text-white text-xs sm:text-sm py-2 px-4 text-center font-medium border-b border-blue-600/40 flex items-center justify-center gap-2">
+      <div className="bg-gradient-to-r from-emerald-700 via-teal-700 to-blue-800 text-white text-xs sm:text-sm py-2 px-4 text-center font-medium border-b border-emerald-600/40 flex items-center justify-center gap-2">
         <Sparkles className="w-4 h-4 text-amber-300 shrink-0" />
         <span>
-          <strong className="font-bold">New:</strong> Automated Pipeline-to-Invoice Triggers & 30/60/90-Day Cash Projections now live in Cimpres.
+          <strong className="font-bold">100% Free Forever:</strong> The Automated 7-Account Cash Flow OS & Invoicing Engine is now free for every business.
         </span>
         <button
           onClick={() => openAuthModal('signup')}
-          className="underline font-bold hover:text-blue-100 ml-1 cursor-pointer"
+          className="underline font-bold hover:text-emerald-100 ml-1 cursor-pointer"
         >
-          Explore Free →
+          Get Free Access →
         </button>
       </div>
 
@@ -133,11 +135,11 @@ export const LandingPage: React.FC = () => {
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xl font-extrabold text-white tracking-tight">Cimpres</span>
-                <span className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-blue-500/20 text-blue-400 border border-blue-500/30">
-                  Engine
+                <span className="text-[11px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                  100% FREE
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400 hidden sm:block">Cash Flow & CRM Operating System</p>
+              <p className="text-[11px] text-slate-400 hidden sm:block">7-Account Cash Flow Operating System</p>
             </div>
           </div>
 
@@ -146,8 +148,7 @@ export const LandingPage: React.FC = () => {
             <a href="#simulator" className="hover:text-white transition">7-Account Engine</a>
             <a href="#features" className="hover:text-white transition">Features</a>
             <a href="#calculator" className="hover:text-white transition">Profit ROI</a>
-            <a href="#workflow" className="hover:text-white transition">Pipeline-to-Cash</a>
-            <a href="#pricing" className="hover:text-white transition">Pricing</a>
+            <a href="#pricing" className="hover:text-white transition">Why 100% Free?</a>
             <a href="#faq" className="hover:text-white transition">FAQ</a>
           </nav>
 
@@ -185,7 +186,7 @@ export const LandingPage: React.FC = () => {
                   className="inline-flex items-center gap-1.5 px-4 sm:px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs sm:text-sm font-bold shadow-md shadow-blue-600/25 transition cursor-pointer"
                   id="landing-nav-signup"
                 >
-                  <span>Start Free Trial</span>
+                  <span>Get Free Access</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </>
@@ -203,9 +204,9 @@ export const LandingPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center max-w-3xl mx-auto mb-12">
             {/* Eyebrow Badge */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs sm:text-sm font-semibold mb-6">
-              <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
-              <span>THE FINANCIAL OPERATING SYSTEM FOR HIGH-GROWTH BUSINESSES</span>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs sm:text-sm font-bold mb-6">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>THE 100% FREE FINANCIAL OPERATING SYSTEM • NO SUBSCRIPTIONS</span>
             </div>
 
             {/* Main Headline */}
@@ -215,7 +216,7 @@ export const LandingPage: React.FC = () => {
 
             {/* Subhead */}
             <p className="text-lg sm:text-xl text-slate-300 leading-relaxed font-normal mb-8">
-              Traditional accounting looks backwards at history. <strong className="text-white font-semibold">Cimpres</strong> automatically splits every client payment across <span className="text-blue-400 font-semibold">7 dedicated reserves</span> in real time—locking in founder profit first, automating invoices from your CRM, and ending cash flow surprises forever.
+              Traditional accounting looks backwards at history. <strong className="text-white font-semibold">Cimpres</strong> is <span className="text-emerald-400 font-bold">100% free</span> and automatically splits every client payment across <span className="text-blue-400 font-semibold">7 dedicated reserves</span> in real time—locking in founder profit first, automating invoices, and ending cash flow surprises forever.
             </p>
 
             {/* Dual CTAs */}
@@ -225,7 +226,7 @@ export const LandingPage: React.FC = () => {
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-base shadow-xl shadow-blue-600/30 hover:scale-[1.02] active:scale-[0.98] transition cursor-pointer"
                 id="hero-btn-start-trial"
               >
-                <span>Start 14-Day Free Trial</span>
+                <span>Get Instant Free Access</span>
                 <ArrowRight className="w-5 h-5" />
               </button>
 
@@ -235,7 +236,7 @@ export const LandingPage: React.FC = () => {
                 id="hero-btn-instant-demo"
               >
                 <Zap className="w-5 h-5 text-amber-400" />
-                <span>Test Drive Live System</span>
+                <span>Test Drive Live System (1-Click)</span>
               </button>
             </div>
 
@@ -243,15 +244,15 @@ export const LandingPage: React.FC = () => {
             <div className="flex flex-wrap items-center justify-center gap-y-2 gap-x-6 text-xs text-slate-400">
               <div className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <span>100% Free forever</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                 <span>No credit card required</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                 <span>Instant 7-account setup</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span>Sample data preloaded</span>
               </div>
             </div>
           </div>
@@ -550,11 +551,11 @@ export const LandingPage: React.FC = () => {
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">✓</span>
-                  <span><strong>CRM-to-Invoice Harmony:</strong> Moving deals to "Won" creates invoices, generates payment links, and allocates cash upon settlement.</span>
+                  <span><strong>Automated Invoicing & Instant Allocation:</strong> Create invoices, send payment links, and partition cash across all 7 accounts automatically the moment settlement occurs.</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">✓</span>
-                  <span><strong>Predictive Cash Radar:</strong> 30/60/90-day cash projections blend current account balances with weighted sales pipeline closing odds.</span>
+                  <span><strong>Predictive Cash Radar:</strong> Continuous 30/60/90-day cash projections blend current account balances with anticipated invoice settlements to prevent shortfalls.</span>
                 </li>
               </ul>
             </div>
@@ -573,7 +574,7 @@ export const LandingPage: React.FC = () => {
               Everything Needed to Scale Profitably in One Screen
             </h3>
             <p className="text-base text-slate-400 mt-3">
-              Replace messy spreadsheets, siloed CRM apps, and disconnected invoicing tools with a unified cash flow cockpit.
+              Replace messy spreadsheets and disconnected invoicing tools with a unified 100% free cash flow cockpit.
             </p>
 
             {/* Feature Tabs Switcher */}
@@ -581,7 +582,7 @@ export const LandingPage: React.FC = () => {
               {[
                 { id: 'distribution', label: '7-Account Distribution', icon: PieChart },
                 { id: 'invoicing', label: 'Automated Invoicing', icon: Receipt },
-                { id: 'crm', label: 'Client Pipeline & CRM', icon: Users },
+                { id: 'paylinks', label: 'Payment Links & Settlement', icon: CreditCard },
                 { id: 'reporting', label: 'Real-Time Financial Reports', icon: BarChart3 },
               ].map((tab) => {
                 const Icon = tab.icon;
@@ -736,73 +737,78 @@ export const LandingPage: React.FC = () => {
               </div>
             )}
 
-            {activeFeatureTab === 'crm' && (
+            {activeFeatureTab === 'paylinks' && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
                 <div>
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 text-violet-400 text-xs font-bold mb-4">
-                    <span>FULL-CYCLE CLIENT TRACKING</span>
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/10 text-teal-400 text-xs font-bold mb-4">
+                    <span>INSTANT BILLING & COLLECTION</span>
                   </div>
                   <h4 className="text-2xl font-black text-white mb-4">
-                    Sales Pipeline with Weighted Cash Forecasts
+                    Payment Links & Instant Cash Allocation
                   </h4>
                   <p className="text-slate-300 text-sm leading-relaxed mb-6">
-                    Manage leads from initial discovery through to Won deals. Each deal stage applies an algorithmic probability score so you can predict exact cash inflow dates and prepare account allocations ahead of time.
+                    Collect payments effortlessly with one-click shareable checkout links sent via Email, SMS, or WhatsApp. The exact moment an invoice is settled, Cimpres automatically partitions the funds across all 7 accounts in real time.
                   </p>
                   <div className="space-y-3">
                     <div className="flex items-center gap-3 text-sm text-slate-300">
                       <Check className="w-4 h-4 text-emerald-400" />
-                      <span>Client Health scores: Lifetime Value (LTV), Win Rate, and On-Time Payment %</span>
+                      <span>One-click shareable links supporting Cards, Wire, and Bank Transfers</span>
                     </div>
                     <div className="flex items-center gap-3 text-sm text-slate-300">
                       <Check className="w-4 h-4 text-emerald-400" />
-                      <span>Kanban Drag-and-Drop Deal Board with instant deal value totals</span>
+                      <span>Instant automated deposit recognition and 7-way account segregation</span>
                     </div>
                     <div className="flex items-center gap-3 text-sm text-slate-300">
                       <Check className="w-4 h-4 text-emerald-400" />
-                      <span>Scheduled client follow-up tasks and priority reminders</span>
+                      <span>Zero software platform fees — 100% free forever for all businesses</span>
                     </div>
                   </div>
                   <button
                     onClick={() => openAuthModal('signup')}
-                    className="mt-8 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-sm transition cursor-pointer"
+                    className="mt-8 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-sm transition cursor-pointer"
                   >
-                    <span>Explore CRM Dashboard</span>
+                    <span>Test Payment Links Free</span>
                     <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
 
                 <div className="bg-slate-950 p-6 rounded-2xl border border-slate-800 space-y-3">
-                  <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-bold text-white">OmniStack Cloud Infrastructure</p>
-                      <p className="text-[11px] text-slate-400">Stage: Negotiation (75% Probability)</p>
+                  <div className="p-4 rounded-xl bg-slate-900 border border-teal-500/30">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-xs font-bold text-teal-400 flex items-center gap-1.5">
+                        <Link2 className="w-3.5 h-3.5" />
+                        <span>SHAREABLE PAYMENT LINK ACTIVE</span>
+                      </span>
+                      <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400">
+                        1-Click Ready
+                      </span>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-black text-emerald-400">$34,000</p>
-                      <p className="text-[10px] text-slate-400">Weighted: $25,500</p>
+                    <p className="text-base font-bold text-white">Full-Stack Cloud Infrastructure</p>
+                    <p className="text-xs text-slate-400">Client: Horizon Health • $18,500.00</p>
+                    <div className="mt-3 p-3 rounded-lg bg-slate-950/80 border border-slate-800 text-xs space-y-1.5">
+                      <div className="flex justify-between text-slate-300">
+                        <span>Automated 20% Profit:</span>
+                        <span className="text-amber-400 font-bold">$3,700.00</span>
+                      </div>
+                      <div className="flex justify-between text-slate-300">
+                        <span>Automated 25% Payroll:</span>
+                        <span className="text-indigo-400 font-bold">$4,625.00</span>
+                      </div>
+                      <div className="flex justify-between text-slate-300">
+                        <span>COGS, Tax & Reserves:</span>
+                        <span className="text-blue-400 font-bold">$10,175.00</span>
+                      </div>
                     </div>
                   </div>
 
                   <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
                     <div>
-                      <p className="text-xs font-bold text-white">Velocity Brand Architecture</p>
-                      <p className="text-[11px] text-slate-400">Stage: Proposal Sent (50% Probability)</p>
+                      <p className="text-xs font-bold text-white">Instant Payment Simulator</p>
+                      <p className="text-[11px] text-slate-400">Test one-click settlement with live test data</p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-black text-emerald-400">$18,500</p>
-                      <p className="text-[10px] text-slate-400">Weighted: $9,250</p>
-                    </div>
-                  </div>
-
-                  <div className="p-3.5 rounded-xl bg-slate-900 border border-emerald-500/40 bg-emerald-500/5 flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-bold text-white">Apex Growth Retainer</p>
-                      <p className="text-[11px] text-emerald-400 font-semibold">Stage: Won (100% Probability)</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-black text-emerald-400">$22,000</p>
-                      <p className="text-[10px] text-emerald-300">Invoice Auto-Generated</p>
-                    </div>
+                    <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-blue-600/20 text-blue-300 border border-blue-500/30">
+                      Live Simulation
+                    </span>
                   </div>
                 </div>
               </div>
@@ -1048,7 +1054,7 @@ export const LandingPage: React.FC = () => {
                   ))}
                 </div>
                 <p className="text-slate-300 text-sm leading-relaxed mb-6">
-                  "The automated Deal-to-Invoice workflow alone saves our account managers 10 hours each week. Moving a client to 'Won' generates the invoice, sends the payment link, and allocates cash the moment it arrives."
+                  "The automated invoicing and instant payment links save our operations team 10 hours each week. Generating invoices, collecting payment via one-click links, and seeing money split across all 7 accounts instantly is game-changing."
                 </p>
               </div>
               <div className="pt-4 border-t border-slate-800 flex items-center gap-3">
@@ -1071,7 +1077,7 @@ export const LandingPage: React.FC = () => {
                   ))}
                 </div>
                 <p className="text-slate-300 text-sm leading-relaxed mb-6">
-                  "We replaced 3 disjointed SaaS tools (HubSpot, QuickBooks, and complex Google Sheets) with Cimpres. Our net founder profit jumped from 8% to 22% in our first quarter of disciplined reserve allocation."
+                  "We replaced expensive disjointed SaaS accounting tools and messy spreadsheets with Cimpres. And the fact that it is 100% free with zero fees or monthly subscriptions makes it the best financial software decision we've ever made."
                 </p>
               </div>
               <div className="pt-4 border-t border-slate-800 flex items-center gap-3">
@@ -1088,160 +1094,120 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* 10. PRICING TIERS */}
+      {/* 10. 100% FREE OPERATING SUITE */}
       <section id="pricing" className="py-20 sm:py-28 bg-slate-900 border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-blue-400 mb-3">
-              SIMPLE, TRANSPARENT INVESTMENT
+            <h2 className="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-3">
+              ZERO SUBSCRIPTIONS • 100% FREE FOR EVERYONE
             </h2>
             <h3 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-              Pick Your Tier. Automate Your Cash Flow.
+              Powerful Financial Discipline Shouldn't Cost $100s/Month.
             </h3>
             <p className="text-base text-slate-400 mt-4">
-              All plans include full 14-day access to the 7-Account Engine, CRM, and automated invoicing.
+              Cimpres is completely free. No trial periods, no hidden fees, no credit card required. Full access to the 7-Account Engine, automated invoicing, and real-time financial reporting for every founder and team.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto items-stretch">
-            {/* Tier 1: Starter */}
-            <div className="bg-slate-950 border border-slate-800 rounded-3xl p-8 flex flex-col justify-between">
-              <div>
-                <p className="text-sm font-bold text-slate-400">Starter</p>
-                <div className="mt-4 flex items-baseline gap-1">
-                  <span className="text-4xl font-black text-white">$49</span>
-                  <span className="text-xs text-slate-400 font-semibold">/ month</span>
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-gradient-to-b from-slate-900 via-slate-950 to-slate-900 border-2 border-emerald-500/40 rounded-3xl p-8 sm:p-12 relative shadow-2xl shadow-emerald-500/10">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-8 border-b border-slate-800">
+                <div>
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-bold mb-3">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>LIFETIME UNRESTRICTED ACCESS</span>
+                  </div>
+                  <h4 className="text-2xl sm:text-3xl font-black text-white">
+                    The Complete 7-Account Operating Suite
+                  </h4>
+                  <p className="text-sm text-slate-400 mt-1">
+                    Free forever for founders, agencies, consultancies, and high-growth businesses.
+                  </p>
                 </div>
-                <p className="text-xs text-slate-400 mt-2">
-                  Ideal for solo founders, boutique consultancies, and independent agencies.
-                </p>
 
-                <ul className="mt-8 space-y-3.5 text-xs text-slate-300">
-                  <li className="flex items-center gap-2.5">
-                    <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>7-Account automated cash distribution</span>
-                  </li>
-                  <li className="flex items-center gap-2.5">
-                    <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>CRM contacts & sales pipeline board</span>
-                  </li>
-                  <li className="flex items-center gap-2.5">
-                    <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>Up to 50 active invoices per month</span>
-                  </li>
-                  <li className="flex items-center gap-2.5">
-                    <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>Real-time executive P&L statement</span>
-                  </li>
-                  <li className="flex items-center gap-2.5">
-                    <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>Secure local and cloud persistence</span>
-                  </li>
-                </ul>
-              </div>
-
-              <button
-                onClick={() => openAuthModal('signup')}
-                className="mt-8 w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition cursor-pointer"
-              >
-                Start Free 14-Day Trial
-              </button>
-            </div>
-
-            {/* Tier 2: Growth / Pro (Featured) */}
-            <div className="bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-blue-500 rounded-3xl p-8 flex flex-col justify-between relative shadow-2xl shadow-blue-500/15">
-              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-blue-600 text-white text-[11px] font-black tracking-wider uppercase shadow-md">
-                MOST POPULAR FOR AGENCIES
-              </div>
-
-              <div>
-                <p className="text-sm font-bold text-blue-400">Growth / Pro</p>
-                <div className="mt-4 flex items-baseline gap-1">
-                  <span className="text-4xl font-black text-white">$99</span>
-                  <span className="text-xs text-slate-400 font-semibold">/ month</span>
+                <div className="sm:text-right shrink-0">
+                  <div className="flex items-baseline sm:justify-end gap-1">
+                    <span className="text-5xl font-black text-emerald-400">$0</span>
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">/ FOREVER</span>
+                  </div>
+                  <p className="text-xs text-slate-400 mt-1 font-semibold">No credit card ever required</p>
                 </div>
-                <p className="text-xs text-slate-400 mt-2">
-                  For scaling agencies and service companies managing up to $200k/mo.
-                </p>
-
-                <ul className="mt-8 space-y-3.5 text-xs text-slate-300">
-                  <li className="flex items-center gap-2.5">
-                    <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span><strong>Everything in Starter, plus:</strong></span>
-                  </li>
-                  <li className="flex items-center gap-2.5">
-                    <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>Automated Deal-to-Invoice triggers</span>
-                  </li>
-                  <li className="flex items-center gap-2.5">
-                    <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>Unlimited shareable payment links</span>
-                  </li>
-                  <li className="flex items-center gap-2.5">
-                    <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>30/60/90-Day predictive cash forecasting</span>
-                  </li>
-                  <li className="flex items-center gap-2.5">
-                    <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>Client Communications Hub (Email, SMS, WhatsApp)</span>
-                  </li>
-                  <li className="flex items-center gap-2.5">
-                    <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>Interactive "What-If" Scenario Simulator</span>
-                  </li>
-                </ul>
               </div>
 
-              <button
-                onClick={() => openAuthModal('signup')}
-                className="mt-8 w-full py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-sm font-black shadow-lg shadow-blue-600/30 transition cursor-pointer"
-              >
-                Start Free 14-Day Trial
-              </button>
-            </div>
-
-            {/* Tier 3: Enterprise */}
-            <div className="bg-slate-950 border border-slate-800 rounded-3xl p-8 flex flex-col justify-between">
-              <div>
-                <p className="text-sm font-bold text-slate-400">Scale & Enterprise</p>
-                <div className="mt-4 flex items-baseline gap-1">
-                  <span className="text-4xl font-black text-white">$199</span>
-                  <span className="text-xs text-slate-400 font-semibold">/ month</span>
+              {/* Capabilities Grid */}
+              <div className="py-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex items-start gap-3 p-3.5 rounded-xl bg-slate-900/60 border border-slate-800">
+                  <Check className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-bold text-white">7-Account Automatic Segregation</p>
+                    <p className="text-xs text-slate-400">Ring-fence profit, payroll, rent, and overhead instantly</p>
+                  </div>
                 </div>
-                <p className="text-xs text-slate-400 mt-2">
-                  For multi-partner firms and organizations with bespoke cash distribution needs.
-                </p>
 
-                <ul className="mt-8 space-y-3.5 text-xs text-slate-300">
-                  <li className="flex items-center gap-2.5">
-                    <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span><strong>Everything in Growth / Pro, plus:</strong></span>
-                  </li>
-                  <li className="flex items-center gap-2.5">
-                    <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>Multi-entity & multi-currency support</span>
-                  </li>
-                  <li className="flex items-center gap-2.5">
-                    <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>Custom account formulas and sub-reserves</span>
-                  </li>
-                  <li className="flex items-center gap-2.5">
-                    <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>Priority dedicated concierge onboarding</span>
-                  </li>
-                  <li className="flex items-center gap-2.5">
-                    <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>Unlimited team logins & custom permissions</span>
-                  </li>
-                </ul>
+                <div className="flex items-start gap-3 p-3.5 rounded-xl bg-slate-900/60 border border-slate-800">
+                  <Check className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-bold text-white">Automated Professional Invoicing</p>
+                    <p className="text-xs text-slate-400">Generate itemized invoices with live payment links</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 p-3.5 rounded-xl bg-slate-900/60 border border-slate-800">
+                  <Check className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-bold text-white">One-Click Shareable Payment Links</p>
+                    <p className="text-xs text-slate-400">Share via SMS, WhatsApp, or Email with zero platform fees</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 p-3.5 rounded-xl bg-slate-900/60 border border-slate-800">
+                  <Check className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-bold text-white">Real-Time Executive P&L Reporting</p>
+                    <p className="text-xs text-slate-400">Income statements, cash curves, and runway forecasts</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 p-3.5 rounded-xl bg-slate-900/60 border border-slate-800">
+                  <Check className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-bold text-white">Interactive Scenario Simulator</p>
+                    <p className="text-xs text-slate-400">Stress-test hiring, price shifts, and revenue swings</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 p-3.5 rounded-xl bg-slate-900/60 border border-slate-800">
+                  <Check className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-bold text-white">Encrypted Local & Cloud Storage</p>
+                    <p className="text-xs text-slate-400">AES-256 financial security and one-click data export</p>
+                  </div>
+                </div>
               </div>
 
-              <button
-                onClick={() => openAuthModal('signup')}
-                className="mt-8 w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition cursor-pointer"
-              >
-                Start Free 14-Day Trial
-              </button>
+              {/* Action Banner */}
+              <div className="pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-2 text-xs text-slate-300">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  <span>Setup takes less than 2 minutes • Preloaded with demo data</span>
+                </div>
+
+                <div className="flex items-center gap-3 w-full sm:w-auto">
+                  <button
+                    onClick={quickDemoLogin}
+                    className="flex-1 sm:flex-none px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-slate-700 transition cursor-pointer"
+                  >
+                    1-Click Demo
+                  </button>
+                  <button
+                    onClick={() => openAuthModal('signup')}
+                    className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-7 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-600/30 transition cursor-pointer"
+                  >
+                    <span>Claim Your Free Account</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1307,10 +1273,10 @@ export const LandingPage: React.FC = () => {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
               onClick={() => openAuthModal('signup')}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-black text-base shadow-xl shadow-blue-600/30 transition cursor-pointer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-base shadow-xl shadow-emerald-600/30 transition cursor-pointer"
               id="cta-bottom-start-trial"
             >
-              <span>Start Your 14-Day Free Trial</span>
+              <span>Claim Your 100% Free Account</span>
               <ArrowRight className="w-5 h-5" />
             </button>
 
@@ -1325,7 +1291,7 @@ export const LandingPage: React.FC = () => {
           </div>
 
           <p className="text-xs text-slate-400 mt-6">
-            Instant setup • Pre-populated demo accounts included • Cancel anytime
+            Instant setup • 100% Free Forever • No credit card required
           </p>
         </div>
       </section>
@@ -1339,14 +1305,14 @@ export const LandingPage: React.FC = () => {
                 C
               </div>
               <span className="font-extrabold text-white text-base">Cimpres Engine</span>
-              <span className="text-slate-400 text-xs">Financial OS & CRM</span>
+              <span className="text-slate-400 text-xs">Financial OS • 100% Free</span>
             </div>
 
             <div className="flex flex-wrap items-center gap-6 text-slate-400">
               <a href="#simulator" className="hover:text-white transition">Simulator</a>
               <a href="#features" className="hover:text-white transition">Features</a>
               <a href="#calculator" className="hover:text-white transition">ROI Calculator</a>
-              <a href="#pricing" className="hover:text-white transition">Pricing</a>
+              <a href="#pricing" className="hover:text-white transition">100% Free</a>
               <a href="#faq" className="hover:text-white transition">FAQ</a>
               <button
                 onClick={() => openAuthModal('login')}

@@ -5,21 +5,14 @@ import { Sidebar } from './components/Sidebar';
 import { DashboardView } from './components/DashboardView';
 import { CashFlowView } from './components/CashFlowView';
 import { InvoicingView } from './components/InvoicingView';
-import { ClientsView } from './components/ClientsView';
-import { PipelineView } from './components/PipelineView';
 import { FinancialReportingView } from './components/FinancialReportingView';
 import { PaymentLinksView } from './components/PaymentLinksView';
-import { TasksView } from './components/TasksView';
-import { QuotesView } from './components/QuotesView';
-import { CommunicationsView } from './components/CommunicationsView';
 import { SettingsView } from './components/SettingsView';
 import { LandingPage } from './components/landing/LandingPage';
 
 // Modals
 import { CashInModal } from './components/modals/CashInModal';
 import { NewInvoiceModal } from './components/modals/NewInvoiceModal';
-import { NewDealModal } from './components/modals/NewDealModal';
-import { NewClientModal } from './components/modals/NewClientModal';
 import { InvoicePreviewModal } from './components/modals/InvoicePreviewModal';
 import { AuthModal } from './components/modals/AuthModal';
 
@@ -66,13 +59,8 @@ const AppContent: React.FC = () => {
             <CashFlowView />
           )}
           {activeTab === 'invoices' && <InvoicingView />}
-          {activeTab === 'clients' && <ClientsView />}
-          {activeTab === 'pipeline' && <PipelineView />}
           {activeTab === 'reports' && <FinancialReportingView />}
-          {activeTab === 'quotes' && <QuotesView />}
           {(activeTab === 'payment-links' || activeTab === 'paylinks') && <PaymentLinksView />}
-          {activeTab === 'tasks' && <TasksView />}
-          {activeTab === 'communications' && <CommunicationsView />}
           {activeTab === 'settings' && <SettingsView />}
         </main>
       </div>
@@ -80,8 +68,6 @@ const AppContent: React.FC = () => {
       {/* Interactive Global Modals */}
       <CashInModal />
       <NewInvoiceModal />
-      <NewDealModal />
-      <NewClientModal />
       <InvoicePreviewModal />
       <AuthModal />
 
