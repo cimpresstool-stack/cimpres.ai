@@ -1,0 +1,76 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 100
+        },
+        "companyName": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "role": {
+          "type": "string",
+          "maxLength": 50
+        },
+        "createdAt": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "email",
+        "createdAt"
+      ]
+    },
+    "AppStateData": {
+      "title": "AppStateData",
+      "description": "User cash flow and financial data state",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        },
+        "balances": {
+          "type": "object"
+        },
+        "percentages": {
+          "type": "object"
+        },
+        "settings": {
+          "type": "object"
+        },
+        "updatedAt": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "userId",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Individual user account profile"
+    },
+    "/users/{userId}/appData/{docId}": {
+      "schema": "AppStateData",
+      "description": "User cash flow financial data state"
+    }
+  }
+}

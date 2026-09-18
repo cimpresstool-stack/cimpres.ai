@@ -1,6 +1,16 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  updateProfile,
+  sendPasswordResetEmail,
+} from 'firebase/auth';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { auth, db } from '../firebase';
+import {
   AppState,
   AccountKey,
   ClientContact,
@@ -31,6 +41,7 @@ interface AppContextType {
   // Auth & Visitor Landing
   currentUser: UserProfile | null;
   isAuthenticated: boolean;
+  authLoading: boolean;
   isLandingPageActive: boolean;
   setIsLandingPageActive: (active: boolean) => void;
   isAuthModalOpen: boolean;
@@ -38,10 +49,11 @@ interface AppContextType {
   authModalMode: 'login' | 'signup';
   setAuthModalMode: (mode: 'login' | 'signup') => void;
   openAuthModal: (mode?: 'login' | 'signup') => void;
-  login: (email: string, name?: string, companyName?: string) => void;
-  signup: (email: string, name: string, companyName: string, password?: string) => void;
+  login: (email: string, password?: string) => Promise<void>;
+  signup: (email: string, password: string, name: string, companyName: string, businessType?: string) => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
   quickDemoLogin: () => void;
-  logout: () => void;
+  logout: () => Promise<void>;
 
   // Modals & Drawers
   isCashInModalOpen: boolean;
@@ -146,6 +158,74 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'signup'>('login');
+  const [authLoading, setAuthLoading] = useState<boolean>(true);
+
+  // Sync with Firebase Auth state
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+      if (fbUser) {
+        try {
+          const userDocRef = doc(db, 'users', fbUser.uid);
+          const snap = await getDoc(userDocRef);
+          if (snap.exists()) {
+            const data = snap.data();
+            const profile: UserProfile = {
+              id: fbUser.uid,
+              name: data.name || fbUser.displayName || 'Business Leader',
+              email: fbUser.email || '',
+              companyName: data.companyName || 'My Enterprise',
+              role: data.role || 'Executive Administrator',
+              businessType: data.businessType,
+              createdAt: data.createdAt || new Date().toISOString(),
+            };
+            setCurrentUser(profile);
+          } else {
+            const profile: UserProfile = {
+              id: fbUser.uid,
+              name: fbUser.displayName || (fbUser.email ? fbUser.email.split('@')[0] : 'Business Leader'),
+              email: fbUser.email || '',
+              companyName: 'My Enterprise',
+              role: 'Executive Administrator',
+              createdAt: new Date().toISOString(),
+            };
+            setCurrentUser(profile);
+            try {
+              await setDoc(userDocRef, profile);
+            } catch (docErr) {
+              console.warn('Profile write notice:', docErr);
+            }
+          }
+          setIsLandingPageActive(false);
+        } catch (err) {
+          console.error('Error fetching user profile from Firestore:', err);
+          setCurrentUser({
+            id: fbUser.uid,
+            name: fbUser.displayName || (fbUser.email ? fbUser.email.split('@')[0] : 'Business Leader'),
+            email: fbUser.email || '',
+            companyName: 'My Enterprise',
+            role: 'Executive Administrator',
+            createdAt: new Date().toISOString(),
+          });
+          setIsLandingPageActive(false);
+        }
+      } else {
+        // If not authenticated via Firebase, check if demo mode user was saved
+        const savedUser = localStorage.getItem(AUTH_STORAGE_KEY);
+        if (savedUser) {
+          try {
+            setCurrentUser(JSON.parse(savedUser));
+          } catch {
+            setCurrentUser(null);
+          }
+        } else {
+          setCurrentUser(null);
+        }
+      }
+      setAuthLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const [isCashInModalOpen, setIsCashInModalOpen] = useState<boolean>(false);
   const [isNewInvoiceModalOpen, setIsNewInvoiceModalOpen] = useState<boolean>(false);
@@ -769,60 +849,148 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIsAuthModalOpen(true);
   };
 
-  const login = (email: string, name?: string, companyName?: string) => {
-    const cleanEmail = email.trim() || 'cimpresstool@gmail.com';
-    const computedName =
-      name?.trim() ||
-      (cleanEmail.includes('@')
-        ? cleanEmail.split('@')[0].replace(/[._-]/g, ' ')
-        : 'Finance Lead');
-    const computedCompany = companyName?.trim() || 'Cimpres Enterprise';
-
-    const user: UserProfile = {
-      name: computedName.replace(/\b\w/g, (c) => c.toUpperCase()),
-      email: cleanEmail,
-      companyName: computedCompany,
-      role: 'Executive Administrator',
-      createdAt: new Date().toISOString(),
-    };
-
-    setCurrentUser(user);
+  const login = async (email: string, password?: string) => {
+    setAuthLoading(true);
     try {
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
-    } catch (e) {
-      console.error(e);
+      const cleanEmail = email.trim();
+      if (!cleanEmail) {
+        throw new Error('Please enter your business email address.');
+      }
+      if (!password) {
+        throw new Error('Please enter your password.');
+      }
+
+      const cred = await signInWithEmailAndPassword(auth, cleanEmail, password);
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+      setIsAuthModalOpen(false);
+      setIsLandingPageActive(false);
+      showToast(`Welcome back, ${cred.user.displayName || cleanEmail}!`);
+    } catch (error: any) {
+      console.error('Firebase sign-in error:', error);
+      let message = 'Unable to sign in. Please verify your credentials.';
+      if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
+        message = 'Invalid email or password. Please verify your credentials.';
+      } else if (error.code === 'auth/user-not-found') {
+        message = 'No account found with this email. Please create an account first.';
+      } else if (error.code === 'auth/invalid-email') {
+        message = 'Invalid email format. Please check your email.';
+      } else if (error.code === 'auth/too-many-requests') {
+        message = 'Too many failed login attempts. Please try again later or reset password.';
+      } else if (error.message) {
+        message = error.message;
+      }
+      throw new Error(message);
+    } finally {
+      setAuthLoading(false);
     }
-    setIsAuthModalOpen(false);
-    setIsLandingPageActive(false);
-    showToast(`Welcome back, ${user.name}!`);
   };
 
-  const signup = (email: string, name: string, companyName: string) => {
-    const user: UserProfile = {
-      name: name.trim() || 'Business Founder',
-      email: email.trim() || 'founder@business.com',
-      companyName: companyName.trim() || 'Growth Ventures Inc.',
-      role: 'Owner & Managing Director',
-      createdAt: new Date().toISOString(),
-    };
-
-    setCurrentUser(user);
+  const signup = async (
+    email: string,
+    password: string,
+    name: string,
+    companyName: string,
+    businessType?: string
+  ) => {
+    setAuthLoading(true);
     try {
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
-    } catch (e) {
-      console.error(e);
+      const cleanEmail = email.trim();
+      const cleanName = name.trim();
+      const cleanCompany = companyName.trim();
+
+      if (!cleanName) throw new Error('Please enter your full name.');
+      if (!cleanEmail) throw new Error('Please enter a valid work email.');
+      if (!cleanCompany) throw new Error('Please enter your business or company name.');
+      if (!password || password.length < 6) {
+        throw new Error('Password must be at least 6 characters.');
+      }
+
+      const cred = await createUserWithEmailAndPassword(auth, cleanEmail, password);
+      await updateProfile(cred.user, { displayName: cleanName });
+
+      const profile: UserProfile = {
+        id: cred.user.uid,
+        name: cleanName,
+        email: cleanEmail,
+        companyName: cleanCompany,
+        role: 'Owner & Managing Director',
+        businessType: businessType || 'agency',
+        createdAt: new Date().toISOString(),
+      };
+
+      try {
+        const userDocRef = doc(db, 'users', cred.user.uid);
+        await setDoc(userDocRef, profile);
+
+        const stateDocRef = doc(db, 'users', cred.user.uid, 'appData', 'state');
+        await setDoc(stateDocRef, {
+          userId: cred.user.uid,
+          balances: INITIAL_STATE.balances,
+          percentages: INITIAL_STATE.percentages,
+          settings: {
+            ...INITIAL_STATE.settings,
+            businessName: cleanCompany,
+            businessEmail: cleanEmail,
+          },
+          updatedAt: new Date().toISOString(),
+        });
+      } catch (firestoreErr) {
+        console.warn('Firestore profile sync note:', firestoreErr);
+      }
+
+      setCurrentUser(profile);
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+      setIsAuthModalOpen(false);
+      setIsLandingPageActive(false);
+      confetti({ particleCount: 90, spread: 75, origin: { y: 0.6 } });
+      showToast('Firebase account successfully registered! Welcome to your financial cockpit.');
+    } catch (error: any) {
+      console.error('Firebase signup error:', error);
+      let message = 'Registration failed. Please try again.';
+      if (error.code === 'auth/email-already-in-use') {
+        message = 'An account with this email already exists. Please sign in instead.';
+      } else if (error.code === 'auth/weak-password') {
+        message = 'Password is too weak. Please use at least 6 characters.';
+      } else if (error.code === 'auth/invalid-email') {
+        message = 'Invalid email address format.';
+      } else if (error.message) {
+        message = error.message;
+      }
+      throw new Error(message);
+    } finally {
+      setAuthLoading(false);
     }
-    setIsAuthModalOpen(false);
-    setIsLandingPageActive(false);
-    confetti({ particleCount: 90, spread: 75, origin: { y: 0.6 } });
-    showToast(`Account successfully created! Welcome to your Cimpres cockpit.`);
+  };
+
+  const resetPassword = async (email: string) => {
+    const cleanEmail = email.trim();
+    if (!cleanEmail) throw new Error('Please enter your business email to reset password.');
+    await sendPasswordResetEmail(auth, cleanEmail);
+    showToast(`Password reset link sent to ${cleanEmail}`);
   };
 
   const quickDemoLogin = () => {
-    login('cimpresstool@gmail.com', 'Alex Vance', 'Cimpres Global Group');
+    const demoUser: UserProfile = {
+      id: 'demo-guest-user',
+      name: 'Alex Vance (Test Drive)',
+      email: 'cimpresstool@gmail.com',
+      companyName: 'Cimpres Global Group',
+      role: 'Executive Administrator',
+      createdAt: new Date().toISOString(),
+    };
+    setCurrentUser(demoUser);
+    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(demoUser));
+    setIsAuthModalOpen(false);
+    setIsLandingPageActive(false);
+    showToast('Instant Demo session started! All features available.');
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await signOut(auth);
+    } catch (e) {
+      console.error(e);
+    }
     setCurrentUser(null);
     try {
       localStorage.removeItem(AUTH_STORAGE_KEY);
@@ -830,7 +998,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.error(e);
     }
     setIsLandingPageActive(true);
-    showToast('Logged out of Cimpres. Returning to home landing page.');
+    showToast('Signed out of Cimpres. Returning to home landing page.');
   };
 
   return (
@@ -841,6 +1009,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setActiveTab,
         currentUser,
         isAuthenticated: !!currentUser,
+        authLoading,
         isLandingPageActive,
         setIsLandingPageActive,
         isAuthModalOpen,
@@ -850,6 +1019,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         openAuthModal,
         login,
         signup,
+        resetPassword,
         quickDemoLogin,
         logout,
         isCashInModalOpen,

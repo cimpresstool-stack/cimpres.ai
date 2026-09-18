@@ -174,10 +174,12 @@ export interface AutomationRule {
 }
 
 export interface UserProfile {
+  id?: string;
   name: string;
   email: string;
   companyName: string;
   role: string;
+  businessType?: string;
   avatarUrl?: string;
   createdAt: string;
 }
