@@ -27,6 +27,7 @@ export const CashFlowView: React.FC = () => {
     state,
     recordCashIn,
     adjustAccountBalance,
+    setAdjustAccountKey,
     updatePercentages,
     updateSettings,
   } = useApp();
@@ -109,7 +110,15 @@ export const CashFlowView: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <button
+              onClick={() => setAdjustAccountKey('C')}
+              className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm shadow-xs transition cursor-pointer flex items-center gap-1.5"
+              id="feed-balances-btn"
+            >
+              <DollarSign className="w-4 h-4" />
+              <span>Feed / Set Balances</span>
+            </button>
             <button
               onClick={() => setIsEditingPcts(!isEditingPcts)}
               className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs sm:text-sm border border-slate-200 transition cursor-pointer flex items-center gap-1.5"
@@ -233,18 +242,11 @@ export const CashFlowView: React.FC = () => {
 
                 <div className="mt-4 pt-3 border-t border-slate-200/60 flex items-center justify-between">
                   <button
-                    onClick={() => {
-                      const amountStr = window.prompt(`Adjust balance for ${acct.name} (+ or -):`);
-                      if (amountStr) {
-                        const amt = parseFloat(amountStr);
-                        if (!isNaN(amt)) {
-                          adjustAccountBalance(acct.key, amt);
-                        }
-                      }
-                    }}
-                    className="text-xs text-blue-600 hover:text-blue-800 font-bold cursor-pointer"
+                    onClick={() => setAdjustAccountKey(acct.key)}
+                    className="text-xs text-blue-600 hover:text-blue-800 font-bold cursor-pointer hover:underline flex items-center gap-1"
+                    id={`adjust-btn-${acct.key}`}
                   >
-                    Adjust
+                    <span>Feed / Set</span>
                   </button>
                   <span className="text-[10px] font-semibold text-slate-400">Locked</span>
                 </div>

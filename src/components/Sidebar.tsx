@@ -40,6 +40,7 @@ export const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
     activeTab,
     setActiveTab,
     resetToDemoData,
+    setIsResetConfirmModalOpen,
     currentUser,
     setIsLandingPageActive,
     logout,
@@ -222,9 +223,8 @@ export const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
 
           <button
             onClick={() => {
-              if (window.confirm('Reset all cash flow and CRM records back to demo state?')) {
-                resetToDemoData();
-              }
+              setIsResetConfirmModalOpen(true);
+              if (window.innerWidth < 1024) onClose();
             }}
             className="w-full flex items-center justify-center gap-2 px-3 py-1.5 text-xs text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 rounded-lg transition cursor-pointer"
             id="sidebar-reset-btn"

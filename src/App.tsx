@@ -15,6 +15,8 @@ import { CashInModal } from './components/modals/CashInModal';
 import { NewInvoiceModal } from './components/modals/NewInvoiceModal';
 import { InvoicePreviewModal } from './components/modals/InvoicePreviewModal';
 import { AuthModal } from './components/modals/AuthModal';
+import { ResetConfirmModal } from './components/modals/ResetConfirmModal';
+import { AdjustBalanceModal } from './components/modals/AdjustBalanceModal';
 
 const AppContent: React.FC = () => {
   const { activeTab, toastMessage, isLandingPageActive } = useApp();
@@ -27,6 +29,7 @@ const AppContent: React.FC = () => {
         <LandingPage />
         <AuthModal />
         <InvoicePreviewModal />
+        <ResetConfirmModal />
 
         {/* Toast Notification Alert */}
         {toastMessage && (
@@ -70,6 +73,8 @@ const AppContent: React.FC = () => {
       <NewInvoiceModal />
       <InvoicePreviewModal />
       <AuthModal />
+      <ResetConfirmModal />
+      <AdjustBalanceModal />
 
       {/* Toast Notification Alert */}
       {toastMessage && (

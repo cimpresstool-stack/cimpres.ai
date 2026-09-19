@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Settings,
   Building,
@@ -14,7 +14,14 @@ import { ACCOUNTS } from '../data/constants';
 import { AccountKey } from '../types';
 
 export const SettingsView: React.FC = () => {
-  const { state, updateSettings, updatePercentages, resetToDemoData, showToast } = useApp();
+  const {
+    state,
+    updateSettings,
+    updatePercentages,
+    resetToDemoData,
+    setIsResetConfirmModalOpen,
+    showToast,
+  } = useApp();
 
   const [bizName, setBizName] = useState(state.settings.businessName);
   const [bizEmail, setBizEmail] = useState(state.settings.businessEmail);
@@ -25,6 +32,18 @@ export const SettingsView: React.FC = () => {
   const [payrollTarget, setPayrollTarget] = useState(state.settings.monthlyPayrollTarget.toString());
 
   const [pcts, setPcts] = useState<Record<AccountKey, number>>({ ...state.percentages });
+
+  // Sync inputs if settings or percentages change externally or upon demo data reset
+  useEffect(() => {
+    setBizName(state.settings.businessName);
+    setBizEmail(state.settings.businessEmail);
+    setBizPhone(state.settings.businessPhone);
+    setBizAddress(state.settings.businessAddress);
+    setCurrency(state.settings.currency);
+    setRentTarget(state.settings.monthlyRentTarget.toString());
+    setPayrollTarget(state.settings.monthlyPayrollTarget.toString());
+    setPcts({ ...state.percentages });
+  }, [state.settings, state.percentages]);
 
   const totalPct = Object.values(pcts).reduce((a, b) => a + b, 0);
   const isPctValid = Math.abs(totalPct - 100) < 0.01;
@@ -191,12 +210,10 @@ export const SettingsView: React.FC = () => {
               Restores all sample contacts, deals, invoices, and 7-account balances to standard initial demo state.
             </p>
             <button
-              onClick={() => {
-                if (window.confirm('Reset all cash flow and CRM records to default demo data?')) {
-                  resetToDemoData();
-                }
-              }}
+              type="button"
+              onClick={() => setIsResetConfirmModalOpen(true)}
               className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-xs transition cursor-pointer flex items-center gap-1.5"
+              id="settings-reset-demo-data-btn"
             >
               <RotateCcw className="w-4 h-4" />
               <span>Reset to Demo Data</span>

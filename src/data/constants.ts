@@ -107,6 +107,75 @@ export const INITIAL_BALANCES: Record<AccountKey, number> = {
   S: 12800.00,
 };
 
+export const ZERO_BALANCES: Record<AccountKey, number> = {
+  C: 0,
+  I: 0,
+  M: 0,
+  P: 0,
+  R: 0,
+  E: 0,
+  S: 0,
+};
+
+export function createCleanBusinessState(businessName: string = 'My Enterprise', businessEmail: string = ''): AppState {
+  return {
+    balances: { ...ZERO_BALANCES },
+    percentages: { ...INITIAL_PERCENTAGES },
+    settings: {
+      currency: '$',
+      businessName: businessName || 'My Enterprise',
+      businessEmail: businessEmail || '',
+      businessPhone: '',
+      businessAddress: '',
+      monthlyRentTarget: 0,
+      monthlyPayrollTarget: 0,
+    },
+    contacts: [],
+    deals: [],
+    invoices: [],
+    paymentLinks: [],
+    transactions: [],
+    tasks: [],
+    quotes: [],
+    emails: [],
+    campaigns: [],
+    automations: [
+      {
+        id: 'auto-1',
+        name: 'Deal Won → Auto-Generate Invoice & Payment Link',
+        trigger: 'When any Deal enters "Won" stage',
+        action: 'Create draft invoice, generate payment link, and email client instantly',
+        active: true,
+        runCount: 0,
+      },
+      {
+        id: 'auto-2',
+        name: 'Payment Received → Auto-Split into 7 Accounts',
+        trigger: 'When Invoice status changes to "Paid"',
+        action: 'Execute CIMPRES distribution algorithm and fund Rent, Salaries, Profit',
+        active: true,
+        runCount: 0,
+      },
+      {
+        id: 'auto-3',
+        name: 'Overdue Invoice → Smart SMS & WhatsApp Reminder',
+        trigger: 'When Invoice is 3 days past due date',
+        action: 'Send friendly payment link via SMS and notify account owner',
+        active: true,
+        runCount: 0,
+      },
+      {
+        id: 'auto-4',
+        name: 'New Lead Inbound → Add to CRM & Schedule Task',
+        trigger: 'When Contact created with status "Lead"',
+        action: 'Assign welcome email sequence and create high-priority follow-up task',
+        active: true,
+        runCount: 0,
+      },
+    ],
+  };
+}
+
 export function calculateDistribution(amount: number, percentages: Record<AccountKey, number>): Record<AccountKey, number> {
   const totalPct = Object.values(percentages).reduce((sum, p) => sum + p, 0);
   if (totalPct <= 0 || amount <= 0) {

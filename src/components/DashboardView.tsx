@@ -15,6 +15,7 @@ import {
   ChevronRight,
   Send,
   AlertCircle,
+  DollarSign,
 } from 'lucide-react';
 import {
   AreaChart,
@@ -45,6 +46,7 @@ export const DashboardView: React.FC = () => {
     setIsNewInvoiceModalOpen,
     setPreviewInvoice,
     adjustAccountBalance,
+    setAdjustAccountKey,
   } = useApp();
 
   const [quickAmount, setQuickAmount] = useState<string>('4850');
@@ -59,12 +61,15 @@ export const DashboardView: React.FC = () => {
 
   const profitReserve = state.balances.P || 0;
   const rentBalance = state.balances.R || 0;
-  const rentTarget = state.settings.monthlyRentTarget || 6000;
-  const rentPct = Math.min(100, Math.round((rentBalance / rentTarget) * 100));
+  const rentTarget = state.settings.monthlyRentTarget > 0 ? state.settings.monthlyRentTarget : 6000;
+  const rentPct = rentTarget > 0 ? Math.min(100, Math.round((rentBalance / rentTarget) * 100)) : 0;
 
   const salBalance = state.balances.S || 0;
-  const salTarget = state.settings.monthlyPayrollTarget || 14000;
-  const salPct = Math.min(100, Math.round((salBalance / salTarget) * 100));
+  const salTarget = state.settings.monthlyPayrollTarget > 0 ? state.settings.monthlyPayrollTarget : 14000;
+  const salPct = salTarget > 0 ? Math.min(100, Math.round((salBalance / salTarget) * 100)) : 0;
+
+  const totalBalance = Object.values(state.balances).reduce((sum, b) => sum + (b || 0), 0);
+  const isWorkspaceEmpty = totalBalance === 0 && state.transactions.length === 0;
 
   const pendingInvoices = state.invoices.filter((i) => i.status === 'sent');
   const pendingAmount = pendingInvoices.reduce((sum, i) => sum + i.total, 0);
@@ -88,6 +93,46 @@ export const DashboardView: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Onboarding Zero-State Banner for Newly Registered Businesses */}
+      {isWorkspaceEmpty && (
+        <div className="p-5 rounded-2xl bg-gradient-to-r from-blue-900 via-indigo-950 to-slate-900 text-white border border-blue-700/50 shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-4 animate-in fade-in duration-300">
+          <div className="flex items-start gap-3.5">
+            <div className="p-2.5 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-400/30 shrink-0">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-white flex flex-wrap items-center gap-2">
+                <span>Clean Business Slate Active</span>
+                <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                  Account Balances: $0.00
+                </span>
+              </h3>
+              <p className="text-xs text-slate-300 mt-1 max-w-xl leading-relaxed">
+                Your account is set up with all 7 figures at zero. You can now start feeding in your current business bank balances or record your first cash-inflow distribution.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            <button
+              onClick={() => setAdjustAccountKey('C')}
+              className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-sm transition cursor-pointer flex items-center gap-1.5"
+              id="zero-state-feed-balances-btn"
+            >
+              <DollarSign className="w-4 h-4" />
+              <span>Feed Opening Balances</span>
+            </button>
+            <button
+              onClick={() => setIsCashInModalOpen(true)}
+              className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs shadow-sm transition cursor-pointer flex items-center gap-1.5"
+              id="zero-state-cashin-btn"
+            >
+              <ArrowDownRight className="w-4 h-4" />
+              <span>Record Cash In</span>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Welcome Banner & Overview Header */}
       <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 rounded-2xl p-6 text-white shadow-md relative overflow-hidden">
         <div className="relative z-10 max-w-3xl">
@@ -109,6 +154,14 @@ export const DashboardView: React.FC = () => {
             >
               <ArrowDownRight className="w-4 h-4" />
               <span>Record Cash Inflow</span>
+            </button>
+            <button
+              onClick={() => setAdjustAccountKey('C')}
+              className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm transition shadow-sm cursor-pointer flex items-center gap-2"
+              id="dash-feed-balances-btn"
+            >
+              <DollarSign className="w-4 h-4" />
+              <span>Feed Account Figures</span>
             </button>
             <button
               onClick={() => setIsNewInvoiceModalOpen(true)}

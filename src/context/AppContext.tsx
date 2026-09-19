@@ -27,6 +27,9 @@ import {
 } from '../types';
 import {
   INITIAL_STATE,
+  ZERO_BALANCES,
+  INITIAL_PERCENTAGES,
+  createCleanBusinessState,
   calculateDistribution,
   ACCOUNTS,
 } from '../data/constants';
@@ -58,6 +61,8 @@ interface AppContextType {
   // Modals & Drawers
   isCashInModalOpen: boolean;
   setIsCashInModalOpen: (open: boolean) => void;
+  adjustAccountKey: AccountKey | null;
+  setAdjustAccountKey: (key: AccountKey | null) => void;
   isNewInvoiceModalOpen: boolean;
   setIsNewInvoiceModalOpen: (open: boolean) => void;
   isNewDealModalOpen: boolean;
@@ -70,10 +75,13 @@ interface AppContextType {
   setActivePaymentLink: (link: PaymentLink | null) => void;
   selectedContact: ClientContact | null;
   setSelectedContact: (contact: ClientContact | null) => void;
+  isResetConfirmModalOpen: boolean;
+  setIsResetConfirmModalOpen: (open: boolean) => void;
   
   // Actions
   recordCashIn: (amount: number, note: string) => Transaction;
   adjustAccountBalance: (key: AccountKey, amount: number, note?: string) => void;
+  setAccountBalance: (key: AccountKey, targetAmount: number, note?: string) => void;
   updatePercentages: (percentages: Record<AccountKey, number>) => void;
   updateSettings: (settings: Partial<AppSettings>) => void;
   
@@ -114,6 +122,7 @@ interface AppContextType {
   
   // Reset & Helpers
   resetToDemoData: () => void;
+  resetToZeroState: () => void;
   toastMessage: string | null;
   showToast: (msg: string) => void;
 }
@@ -123,6 +132,16 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, setState] = useState<AppState>(() => {
     try {
+      const savedUserStr = localStorage.getItem(AUTH_STORAGE_KEY);
+      if (savedUserStr) {
+        const parsedUser = JSON.parse(savedUserStr);
+        if (parsedUser?.id && parsedUser.id !== 'demo-guest-user') {
+          const userStateStr = localStorage.getItem(`cimpres_state_user_${parsedUser.id}`);
+          if (userStateStr) {
+            return JSON.parse(userStateStr);
+          }
+        }
+      }
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         return JSON.parse(saved);
@@ -167,9 +186,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         try {
           const userDocRef = doc(db, 'users', fbUser.uid);
           const snap = await getDoc(userDocRef);
+          let userProfile: UserProfile;
           if (snap.exists()) {
             const data = snap.data();
-            const profile: UserProfile = {
+            userProfile = {
               id: fbUser.uid,
               name: data.name || fbUser.displayName || 'Business Leader',
               email: fbUser.email || '',
@@ -178,9 +198,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               businessType: data.businessType,
               createdAt: data.createdAt || new Date().toISOString(),
             };
-            setCurrentUser(profile);
           } else {
-            const profile: UserProfile = {
+            userProfile = {
               id: fbUser.uid,
               name: fbUser.displayName || (fbUser.email ? fbUser.email.split('@')[0] : 'Business Leader'),
               email: fbUser.email || '',
@@ -188,12 +207,66 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               role: 'Executive Administrator',
               createdAt: new Date().toISOString(),
             };
-            setCurrentUser(profile);
             try {
-              await setDoc(userDocRef, profile);
+              await setDoc(userDocRef, userProfile);
             } catch (docErr) {
               console.warn('Profile write notice:', docErr);
             }
+          }
+          setCurrentUser(userProfile);
+
+          // Load user-specific state or initialize clean zero-balance state
+          const stateDocRef = doc(db, 'users', fbUser.uid, 'appData', 'state');
+          try {
+            const stateSnap = await getDoc(stateDocRef);
+            if (stateSnap.exists()) {
+              const loadedData = stateSnap.data() as Partial<AppState>;
+              const fullState: AppState = {
+                balances: loadedData.balances || { ...ZERO_BALANCES },
+                percentages: loadedData.percentages || { ...INITIAL_PERCENTAGES },
+                settings: {
+                  currency: loadedData.settings?.currency || '$',
+                  businessName: loadedData.settings?.businessName || userProfile.companyName || 'My Enterprise',
+                  businessEmail: loadedData.settings?.businessEmail || userProfile.email || '',
+                  businessPhone: loadedData.settings?.businessPhone || '',
+                  businessAddress: loadedData.settings?.businessAddress || '',
+                  monthlyRentTarget: loadedData.settings?.monthlyRentTarget || 0,
+                  monthlyPayrollTarget: loadedData.settings?.monthlyPayrollTarget || 0,
+                },
+                contacts: loadedData.contacts || [],
+                deals: loadedData.deals || [],
+                invoices: loadedData.invoices || [],
+                paymentLinks: loadedData.paymentLinks || [],
+                transactions: loadedData.transactions || [],
+                tasks: loadedData.tasks || [],
+                quotes: loadedData.quotes || [],
+                emails: loadedData.emails || [],
+                campaigns: loadedData.campaigns || [],
+                automations: loadedData.automations || INITIAL_STATE.automations,
+              };
+              setState(fullState);
+              try {
+                localStorage.setItem(`cimpres_state_user_${fbUser.uid}`, JSON.stringify(fullState));
+              } catch (e) {}
+            } else {
+              // Check local user cache
+              const userSaved = localStorage.getItem(`cimpres_state_user_${fbUser.uid}`);
+              if (userSaved) {
+                const parsed = JSON.parse(userSaved);
+                setState(parsed);
+                setDoc(stateDocRef, parsed).catch((e) => console.warn(e));
+              } else {
+                // New user without state -> initialize with ZERO figures
+                const cleanState = createCleanBusinessState(userProfile.companyName, userProfile.email);
+                setState(cleanState);
+                try {
+                  localStorage.setItem(`cimpres_state_user_${fbUser.uid}`, JSON.stringify(cleanState));
+                } catch (e) {}
+                setDoc(stateDocRef, cleanState).catch((e) => console.warn(e));
+              }
+            }
+          } catch (stateErr) {
+            console.warn('Firestore state load note:', stateErr);
           }
           setIsLandingPageActive(false);
         } catch (err) {
@@ -228,22 +301,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   const [isCashInModalOpen, setIsCashInModalOpen] = useState<boolean>(false);
+  const [adjustAccountKey, setAdjustAccountKey] = useState<AccountKey | null>(null);
   const [isNewInvoiceModalOpen, setIsNewInvoiceModalOpen] = useState<boolean>(false);
   const [isNewDealModalOpen, setIsNewDealModalOpen] = useState<boolean>(false);
   const [isNewClientModalOpen, setIsNewClientModalOpen] = useState<boolean>(false);
   const [previewInvoice, setPreviewInvoice] = useState<Invoice | null>(null);
   const [activePaymentLink, setActivePaymentLink] = useState<PaymentLink | null>(null);
   const [selectedContact, setSelectedContact] = useState<ClientContact | null>(null);
+  const [isResetConfirmModalOpen, setIsResetConfirmModalOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Sync to local storage
+  // Sync to local storage & Firestore
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      if (currentUser?.id && currentUser.id !== 'demo-guest-user') {
+        const userKey = `cimpres_state_user_${currentUser.id}`;
+        localStorage.setItem(userKey, JSON.stringify(state));
+
+        if (auth.currentUser && auth.currentUser.uid === currentUser.id) {
+          const stateDocRef = doc(db, 'users', currentUser.id, 'appData', 'state');
+          setDoc(stateDocRef, state).catch((err) => console.warn('Firestore sync note:', err));
+        }
+      } else {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      }
     } catch (e) {
       console.error('Failed to save to localStorage', e);
     }
-  }, [state]);
+  }, [state, currentUser]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -314,6 +399,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }));
 
     showToast(`Updated ${acct?.name || key} by ${num >= 0 ? '+' : ''}${state.settings.currency}${Math.abs(num)}`);
+  };
+
+  const setAccountBalance = (key: AccountKey, targetAmount: number, note?: string) => {
+    const target = Math.max(0, Number(targetAmount) || 0);
+    const acct = ACCOUNTS.find((a) => a.key === key);
+    const current = state.balances[key] || 0;
+    const diff = Math.round((target - current) * 100) / 100;
+
+    const newTx: Transaction = {
+      id: `tx-${Date.now()}`,
+      type: diff >= 0 ? 'adjust-add' : 'adjust-sub',
+      amount: diff,
+      note: note || `Opening balance set: ${acct?.name || key}`,
+      date: new Date().toISOString(),
+      accountKey: key,
+    };
+
+    setState((prev) => ({
+      ...prev,
+      balances: {
+        ...prev.balances,
+        [key]: target,
+      },
+      transactions: diff !== 0 ? [newTx, ...prev.transactions] : prev.transactions,
+    }));
+
+    showToast(`Set ${acct?.name || key} figure to ${state.settings.currency}${target.toLocaleString()}`);
   };
 
   const updatePercentages = (percentages: Record<AccountKey, number>) => {
@@ -839,9 +951,62 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const resetToDemoData = () => {
-    localStorage.removeItem(STORAGE_KEY);
-    setState(INITIAL_STATE);
-    showToast('Reset to original sample data');
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (e) {
+      console.error('LocalStorage reset notice:', e);
+    }
+
+    // Produce pristine deep clone of initial demo state
+    const freshState: AppState = JSON.parse(JSON.stringify(INITIAL_STATE));
+    setState(freshState);
+    setIsResetConfirmModalOpen(false);
+    setPreviewInvoice(null);
+    setActivePaymentLink(null);
+    setSelectedContact(null);
+
+    // If signed in with Firebase, also sync to firestore state doc
+    if (auth.currentUser) {
+      try {
+        const stateDocRef = doc(db, 'users', auth.currentUser.uid, 'appData', 'state');
+        setDoc(stateDocRef, freshState).catch((err) => console.warn('Firestore reset sync note:', err));
+        localStorage.setItem(`cimpres_state_user_${auth.currentUser.uid}`, JSON.stringify(freshState));
+      } catch (err) {
+        console.warn('Firestore sync note:', err);
+      }
+    }
+
+    showToast('Sandbox restored to demo data ($60,935 sample figures)');
+  };
+
+  const resetToZeroState = () => {
+    const comp = currentUser?.companyName || state.settings.businessName || 'My Enterprise';
+    const em = currentUser?.email || state.settings.businessEmail || '';
+    const cleanZeroState = createCleanBusinessState(comp, em);
+
+    setState(cleanZeroState);
+    setIsResetConfirmModalOpen(false);
+    setPreviewInvoice(null);
+    setActivePaymentLink(null);
+    setSelectedContact(null);
+
+    if (currentUser?.id && currentUser.id !== 'demo-guest-user') {
+      try {
+        localStorage.setItem(`cimpres_state_user_${currentUser.id}`, JSON.stringify(cleanZeroState));
+      } catch (e) {}
+      if (auth.currentUser) {
+        try {
+          const stateDocRef = doc(db, 'users', auth.currentUser.uid, 'appData', 'state');
+          setDoc(stateDocRef, cleanZeroState).catch((err) => console.warn(err));
+        } catch (e) {}
+      }
+    } else {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanZeroState));
+      } catch (e) {}
+    }
+
+    showToast('All 7 account figures set to zero. Ready for your business numbers!');
   };
 
   const openAuthModal = (mode: 'login' | 'signup' = 'login') => {
@@ -918,32 +1083,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         createdAt: new Date().toISOString(),
       };
 
+      // Initialize clean slate with ZERO figures for all 7 accounts
+      const cleanState = createCleanBusinessState(cleanCompany, cleanEmail);
+      setState(cleanState);
+
       try {
         const userDocRef = doc(db, 'users', cred.user.uid);
         await setDoc(userDocRef, profile);
 
         const stateDocRef = doc(db, 'users', cred.user.uid, 'appData', 'state');
-        await setDoc(stateDocRef, {
-          userId: cred.user.uid,
-          balances: INITIAL_STATE.balances,
-          percentages: INITIAL_STATE.percentages,
-          settings: {
-            ...INITIAL_STATE.settings,
-            businessName: cleanCompany,
-            businessEmail: cleanEmail,
-          },
-          updatedAt: new Date().toISOString(),
-        });
+        await setDoc(stateDocRef, cleanState);
       } catch (firestoreErr) {
         console.warn('Firestore profile sync note:', firestoreErr);
       }
+
+      try {
+        localStorage.setItem(`cimpres_state_user_${cred.user.uid}`, JSON.stringify(cleanState));
+      } catch (e) {}
 
       setCurrentUser(profile);
       localStorage.removeItem(AUTH_STORAGE_KEY);
       setIsAuthModalOpen(false);
       setIsLandingPageActive(false);
       confetti({ particleCount: 90, spread: 75, origin: { y: 0.6 } });
-      showToast('Firebase account successfully registered! Welcome to your financial cockpit.');
+      showToast(`Welcome ${cleanName}! Your account is ready with zero balances to start feeding your business.`);
     } catch (error: any) {
       console.error('Firebase signup error:', error);
       let message = 'Registration failed. Please try again.';
@@ -1036,8 +1199,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setActivePaymentLink,
         selectedContact,
         setSelectedContact,
+        isResetConfirmModalOpen,
+        setIsResetConfirmModalOpen,
+        adjustAccountKey,
+        setAdjustAccountKey,
         recordCashIn,
         adjustAccountBalance,
+        setAccountBalance,
         updatePercentages,
         updateSettings,
         addContact,
@@ -1062,6 +1230,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         sendCampaign,
         toggleAutomation,
         resetToDemoData,
+        resetToZeroState,
         toastMessage,
         showToast,
       }}
