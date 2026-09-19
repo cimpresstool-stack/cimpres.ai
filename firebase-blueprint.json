@@ -61,9 +61,23 @@
         "userId",
         "updatedAt"
       ]
+    },
+    "TestConnection": {
+      "title": "TestConnection",
+      "description": "Connection probe entity",
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        }
+      }
     }
   },
   "firestore": {
+    "/test/{testId}": {
+      "schema": "TestConnection",
+      "description": "Health check document path for testing backend connectivity"
+    },
     "/users/{userId}": {
       "schema": "User",
       "description": "Individual user account profile"

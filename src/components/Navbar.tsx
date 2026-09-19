@@ -28,6 +28,9 @@ export const Navbar: React.FC<{ onToggleMobileSidebar?: () => void }> = ({
     setIsNewInvoiceModalOpen,
     toastMessage,
     activeTab,
+    requireAuth,
+    isAuthenticated,
+    openAuthModal,
   } = useApp();
 
   const totalCashIn = state.transactions
@@ -118,7 +121,10 @@ export const Navbar: React.FC<{ onToggleMobileSidebar?: () => void }> = ({
         <div className="flex items-center gap-2 sm:gap-3 ml-auto">
           {/* Record Cash In Button */}
           <button
-            onClick={() => setIsCashInModalOpen(true)}
+            onClick={() => {
+              if (!requireAuth('record cash inflows')) return;
+              setIsCashInModalOpen(true);
+            }}
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold text-xs sm:text-sm shadow-sm hover:shadow-md hover:from-emerald-500 hover:to-teal-500 active:scale-[0.98] transition cursor-pointer"
             id="nav-btn-record-cashin"
           >

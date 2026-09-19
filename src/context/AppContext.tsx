@@ -52,6 +52,7 @@ interface AppContextType {
   authModalMode: 'login' | 'signup';
   setAuthModalMode: (mode: 'login' | 'signup') => void;
   openAuthModal: (mode?: 'login' | 'signup') => void;
+  requireAuth: (actionName?: string) => boolean;
   login: (email: string, password?: string) => Promise<void>;
   signup: (email: string, password: string, name: string, companyName: string, businessType?: string) => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
@@ -122,7 +123,7 @@ interface AppContextType {
   
   // Reset & Helpers
   resetToDemoData: () => void;
-  resetToZeroState: () => void;
+  resetToZeroState: (promptAuth?: boolean) => void;
   toastMessage: string | null;
   showToast: (msg: string) => void;
 }
@@ -337,7 +338,39 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }, 4000);
   };
 
+  const isAuthenticated = Boolean(currentUser && currentUser.id !== 'demo-guest-user');
+
+  const openAuthModal = (mode: 'login' | 'signup' = 'login') => {
+    setAuthModalMode(mode);
+    setIsAuthModalOpen(true);
+  };
+
+  const requireAuth = (actionName?: string): boolean => {
+    if (!isAuthenticated) {
+      showToast(
+        actionName
+          ? `Account required: Please log in or sign up to ${actionName}.`
+          : 'Please log in or sign up for an account to feed in your data.'
+      );
+      openAuthModal('signup');
+      return false;
+    }
+    return true;
+  };
+
   const recordCashIn = (amount: number, note: string): Transaction => {
+    if (!isAuthenticated) {
+      requireAuth('record cash inflows and distribute figures');
+      return {
+        id: `tx-temp-${Date.now()}`,
+        type: 'cashin',
+        amount: 0,
+        note: 'Account required to feed data',
+        date: new Date().toISOString(),
+        dist: calculateDistribution(0, state.percentages),
+      };
+    }
+
     const num = Math.max(0, Number(amount) || 0);
     const dist = calculateDistribution(num, state.percentages);
 
@@ -377,6 +410,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const adjustAccountBalance = (key: AccountKey, amount: number, note?: string) => {
+    if (!isAuthenticated) {
+      requireAuth('adjust account figures');
+      return;
+    }
+
     const num = Number(amount) || 0;
     const acct = ACCOUNTS.find((a) => a.key === key);
 
@@ -402,6 +440,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const setAccountBalance = (key: AccountKey, targetAmount: number, note?: string) => {
+    if (!isAuthenticated) {
+      requireAuth('feed or set account balances');
+      return;
+    }
+
     const target = Math.max(0, Number(targetAmount) || 0);
     const acct = ACCOUNTS.find((a) => a.key === key);
     const current = state.balances[key] || 0;
@@ -979,7 +1022,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('Sandbox restored to demo data ($60,935 sample figures)');
   };
 
-  const resetToZeroState = () => {
+  const resetToZeroState = (promptAuth: boolean = true) => {
     const comp = currentUser?.companyName || state.settings.businessName || 'My Enterprise';
     const em = currentUser?.email || state.settings.businessEmail || '';
     const cleanZeroState = createCleanBusinessState(comp, em);
@@ -1000,18 +1043,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           setDoc(stateDocRef, cleanZeroState).catch((err) => console.warn(err));
         } catch (e) {}
       }
+      showToast('All 7 account figures reset to zero. Ready for your business numbers!');
     } else {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanZeroState));
       } catch (e) {}
+      showToast('Workspace reset to zero figures.');
+      if (promptAuth) {
+        setTimeout(() => {
+          showToast('To feed in data after resetting, please sign up or log in first.');
+          openAuthModal('signup');
+        }, 300);
+      }
     }
-
-    showToast('All 7 account figures set to zero. Ready for your business numbers!');
-  };
-
-  const openAuthModal = (mode: 'login' | 'signup' = 'login') => {
-    setAuthModalMode(mode);
-    setIsAuthModalOpen(true);
   };
 
   const login = async (email: string, password?: string) => {
@@ -1171,7 +1215,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         activeTab,
         setActiveTab,
         currentUser,
-        isAuthenticated: !!currentUser,
+        isAuthenticated,
+        requireAuth,
         authLoading,
         isLandingPageActive,
         setIsLandingPageActive,

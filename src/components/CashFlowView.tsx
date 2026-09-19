@@ -30,6 +30,8 @@ export const CashFlowView: React.FC = () => {
     setAdjustAccountKey,
     updatePercentages,
     updateSettings,
+    requireAuth,
+    isAuthenticated,
   } = useApp();
 
   const [inputAmount, setInputAmount] = useState<string>('5000');
@@ -48,6 +50,7 @@ export const CashFlowView: React.FC = () => {
 
   const handleDistribute = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!requireAuth('record cash inflows and distribute funds')) return;
     if (parsedAmount <= 0) return;
     recordCashIn(parsedAmount, inputNote);
     setInputAmount('');
@@ -112,7 +115,10 @@ export const CashFlowView: React.FC = () => {
 
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <button
-              onClick={() => setAdjustAccountKey('C')}
+              onClick={() => {
+                if (!requireAuth('feed or set account balances')) return;
+                setAdjustAccountKey('C');
+              }}
               className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm shadow-xs transition cursor-pointer flex items-center gap-1.5"
               id="feed-balances-btn"
             >
@@ -242,7 +248,10 @@ export const CashFlowView: React.FC = () => {
 
                 <div className="mt-4 pt-3 border-t border-slate-200/60 flex items-center justify-between">
                   <button
-                    onClick={() => setAdjustAccountKey(acct.key)}
+                    onClick={() => {
+                      if (!requireAuth('feed or set account figures')) return;
+                      setAdjustAccountKey(acct.key);
+                    }}
                     className="text-xs text-blue-600 hover:text-blue-800 font-bold cursor-pointer hover:underline flex items-center gap-1"
                     id={`adjust-btn-${acct.key}`}
                   >

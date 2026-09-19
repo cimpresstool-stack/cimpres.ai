@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Sliders, DollarSign, Check, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { X, Sliders, DollarSign, Check, ArrowUpRight, ArrowDownRight, Lock } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { ACCOUNTS, formatCurrency } from '../../data/constants';
 import { AccountKey } from '../../types';
@@ -11,6 +11,9 @@ export const AdjustBalanceModal: React.FC = () => {
     setAdjustAccountKey,
     setAccountBalance,
     adjustAccountBalance,
+    requireAuth,
+    isAuthenticated,
+    openAuthModal,
   } = useApp();
 
   const [selectedKey, setSelectedKey] = useState<AccountKey>('C');
@@ -42,6 +45,11 @@ export const AdjustBalanceModal: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!requireAuth('feed or adjust account balances')) {
+      setAdjustAccountKey(null);
+      return;
+    }
+
     const val = parseFloat(amountStr);
     if (isNaN(val)) return;
 
@@ -218,6 +226,18 @@ export const AdjustBalanceModal: React.FC = () => {
             />
           </div>
 
+          {!isAuthenticated && (
+            <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2.5">
+              <Lock className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold">Log in or sign up required to feed figures</p>
+                <p className="text-[11px] text-amber-800 mt-0.5 leading-relaxed">
+                  To save opening balances or record live financial transactions, you must first log into or create your company account.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Modal Actions */}
           <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
             <button
@@ -233,7 +253,7 @@ export const AdjustBalanceModal: React.FC = () => {
               id="save-account-figure-btn"
             >
               <Check className="w-4 h-4" />
-              <span>Save {currentAccount.key} Figure</span>
+              <span>{isAuthenticated ? `Save ${currentAccount.key} Figure` : 'Log In / Sign Up to Save'}</span>
             </button>
           </div>
         </form>

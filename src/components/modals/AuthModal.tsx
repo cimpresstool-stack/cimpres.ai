@@ -420,6 +420,10 @@ export const AuthModal: React.FC = () => {
               <div className="space-y-1.5 pt-1">
                 <div className="flex items-center gap-2 text-xs text-slate-600">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>Starts clean with <strong>$0.00 zero figures</strong> to feed in your actual business numbers</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-slate-600">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                   <span>100% Free forever — no credit card required</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-slate-600">

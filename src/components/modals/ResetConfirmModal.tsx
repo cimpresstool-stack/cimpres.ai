@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { RotateCcw, AlertTriangle, X, CheckCircle2, Sparkles, DollarSign } from 'lucide-react';
+import { RotateCcw, AlertTriangle, X, CheckCircle2, Sparkles, DollarSign, Lock } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
 export const ResetConfirmModal: React.FC = () => {
@@ -9,6 +9,7 @@ export const ResetConfirmModal: React.FC = () => {
     resetToDemoData,
     resetToZeroState,
     currentUser,
+    isAuthenticated,
   } = useApp();
 
   const [selectedAction, setSelectedAction] = useState<'zero' | 'demo'>('zero');
@@ -17,7 +18,7 @@ export const ResetConfirmModal: React.FC = () => {
 
   const handleExecute = () => {
     if (selectedAction === 'zero') {
-      resetToZeroState();
+      resetToZeroState(true);
     } else {
       resetToDemoData();
     }
@@ -88,6 +89,17 @@ export const ResetConfirmModal: React.FC = () => {
               <p className="text-xs text-slate-600 mt-1 leading-relaxed">
                 Sets all 7 account balances to <span className="font-bold text-slate-900">$0.00</span>, clears all sample transactions, clients, deals, and invoices so you can start inputting your live company numbers.
               </p>
+              {!isAuthenticated && (
+                <div className="mt-3 p-2.5 rounded-lg bg-amber-50/80 border border-amber-200 text-amber-900 text-[11px] flex items-start gap-2">
+                  <Lock className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-semibold">Account Required to Feed Data:</span>{' '}
+                    <span>
+                      After resetting to zero figures, you will be prompted to log in or create an account before you can feed in your company figures.
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

@@ -44,6 +44,8 @@ export const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
     currentUser,
     setIsLandingPageActive,
     logout,
+    isAuthenticated,
+    openAuthModal,
   } = useApp();
 
   const pendingInvoicesCount = state.invoices.filter((i) => i.status === 'sent').length;
@@ -184,29 +186,52 @@ export const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
         {/* Footer Actions */}
         <div className="p-4 border-t border-slate-800/80 bg-slate-950/60 space-y-2.5">
           {/* User Profile Mini Card */}
-          <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-black text-xs flex items-center justify-center shrink-0">
-                {currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
+          {isAuthenticated ? (
+            <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-black text-xs flex items-center justify-center shrink-0">
+                  {currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-white truncate">
+                    {currentUser?.name || 'Finance Lead'}
+                  </p>
+                  <p className="text-[10px] text-slate-400 truncate">
+                    {currentUser?.companyName || 'Cimpres Global'}
+                  </p>
+                </div>
               </div>
+              <button
+                onClick={logout}
+                className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition cursor-pointer"
+                title="Log Out & Return to Landing Page"
+                id="sidebar-btn-logout"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ) : (
+            <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-2">
               <div className="min-w-0">
-                <p className="text-xs font-bold text-white truncate">
-                  {currentUser?.name || 'Finance Lead'}
+                <p className="text-xs font-bold text-slate-300 truncate">
+                  Guest Sandbox
                 </p>
                 <p className="text-[10px] text-slate-400 truncate">
-                  {currentUser?.companyName || 'Cimpres Global'}
+                  Log in to feed your figures
                 </p>
               </div>
+              <button
+                onClick={() => {
+                  openAuthModal('login');
+                  if (window.innerWidth < 1024) onClose();
+                }}
+                className="px-2.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition cursor-pointer shrink-0"
+                id="sidebar-btn-login"
+              >
+                Log In / Sign Up
+              </button>
             </div>
-            <button
-              onClick={logout}
-              className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition cursor-pointer"
-              title="Log Out & Return to Landing Page"
-              id="sidebar-btn-logout"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-            </button>
-          </div>
+          )}
 
           {/* Switch to Public Landing Page */}
           <button

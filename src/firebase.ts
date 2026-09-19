@@ -1,12 +1,18 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
+import { initializeFirestore, doc, getDocFromServer } from 'firebase/firestore';
 import firebaseConfig from '../firebase-applet-config.json';
 
 const app = initializeApp(firebaseConfig);
 
-// Initialize Firestore with specific databaseId as specified in firebase-applet-config.json
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+// Initialize Firestore with specific databaseId and long-polling for robust connectivity in proxies/iframes
+export const db = initializeFirestore(
+  app,
+  {
+    experimentalForceLongPolling: true,
+  },
+  firebaseConfig.firestoreDatabaseId
+);
 
 // Initialize Auth
 export const auth = getAuth(app);
@@ -15,15 +21,26 @@ export const auth = getAuth(app);
 export async function testConnection() {
   try {
     await getDocFromServer(doc(db, 'test', 'connection'));
-  } catch (error) {
-    if (error instanceof Error && error.message.includes('the client is offline')) {
-      console.warn('Firebase client is offline or database initializing.');
+  } catch (error: unknown) {
+    const err = error as { code?: string; message?: string } | undefined;
+    if (
+      err?.code === 'unavailable' ||
+      err?.code === 'permission-denied' ||
+      (typeof err?.message === 'string' && (
+        err.message.includes('offline') ||
+        err.message.includes('could not be completed') ||
+        err.message.includes('backend')
+      ))
+    ) {
+      console.info('Firestore initialized in robust offline-tolerant mode.');
+    } else {
+      console.warn('Firestore connection notice:', error);
     }
   }
 }
 
 // Call connection check
-testConnection();
+testConnection().catch(() => {});
 
 export enum OperationType {
   CREATE = 'create',

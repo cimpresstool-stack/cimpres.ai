@@ -47,6 +47,8 @@ export const DashboardView: React.FC = () => {
     setPreviewInvoice,
     adjustAccountBalance,
     setAdjustAccountKey,
+    requireAuth,
+    isAuthenticated,
   } = useApp();
 
   const [quickAmount, setQuickAmount] = useState<string>('4850');
@@ -76,6 +78,7 @@ export const DashboardView: React.FC = () => {
 
   const handleQuickDistribute = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!requireAuth('record cash inflows and distribute funds')) return;
     if (parsedAmount <= 0) return;
     recordCashIn(parsedAmount, quickNote);
     setQuickAmount('');
@@ -114,7 +117,10 @@ export const DashboardView: React.FC = () => {
           </div>
           <div className="flex flex-wrap items-center gap-2.5 shrink-0">
             <button
-              onClick={() => setAdjustAccountKey('C')}
+              onClick={() => {
+                if (!requireAuth('feed opening balances')) return;
+                setAdjustAccountKey('C');
+              }}
               className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-sm transition cursor-pointer flex items-center gap-1.5"
               id="zero-state-feed-balances-btn"
             >
@@ -122,7 +128,10 @@ export const DashboardView: React.FC = () => {
               <span>Feed Opening Balances</span>
             </button>
             <button
-              onClick={() => setIsCashInModalOpen(true)}
+              onClick={() => {
+                if (!requireAuth('record cash inflows')) return;
+                setIsCashInModalOpen(true);
+              }}
               className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs shadow-sm transition cursor-pointer flex items-center gap-1.5"
               id="zero-state-cashin-btn"
             >
@@ -148,7 +157,10 @@ export const DashboardView: React.FC = () => {
           </p>
           <div className="flex flex-wrap items-center gap-3">
             <button
-              onClick={() => setIsCashInModalOpen(true)}
+              onClick={() => {
+                if (!requireAuth('record cash inflows')) return;
+                setIsCashInModalOpen(true);
+              }}
               className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm transition shadow-sm cursor-pointer flex items-center gap-2"
               id="dash-quick-cashin-btn"
             >
@@ -156,7 +168,10 @@ export const DashboardView: React.FC = () => {
               <span>Record Cash Inflow</span>
             </button>
             <button
-              onClick={() => setAdjustAccountKey('C')}
+              onClick={() => {
+                if (!requireAuth('feed account figures')) return;
+                setAdjustAccountKey('C');
+              }}
               className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm transition shadow-sm cursor-pointer flex items-center gap-2"
               id="dash-feed-balances-btn"
             >

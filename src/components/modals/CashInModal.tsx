@@ -1,10 +1,17 @@
 import React, { useState } from 'react';
-import { X, ArrowDownRight, Sparkles } from 'lucide-react';
+import { X, ArrowDownRight, Sparkles, Lock } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { ACCOUNTS, calculateDistribution, formatCurrency } from '../../data/constants';
 
 export const CashInModal: React.FC = () => {
-  const { state, isCashInModalOpen, setIsCashInModalOpen, recordCashIn } = useApp();
+  const {
+    state,
+    isCashInModalOpen,
+    setIsCashInModalOpen,
+    recordCashIn,
+    requireAuth,
+    isAuthenticated,
+  } = useApp();
   const [amount, setAmount] = useState('3500');
   const [note, setNote] = useState('POS & Online Sales Batch');
 
@@ -15,6 +22,10 @@ export const CashInModal: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!requireAuth('record cash inflows and distribute funds')) {
+      setIsCashInModalOpen(false);
+      return;
+    }
     if (parsedAmount <= 0) return;
     recordCashIn(parsedAmount, note);
     setIsCashInModalOpen(false);
@@ -102,11 +113,23 @@ export const CashInModal: React.FC = () => {
             </div>
           </div>
 
+          {!isAuthenticated && (
+            <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2.5">
+              <Lock className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold">Account required to feed live cash inflows</p>
+                <p className="text-[11px] text-amber-800 mt-0.5 leading-relaxed">
+                  Please log in or create an account to record transactions and distribute funds into your private business accounts.
+                </p>
+              </div>
+            </div>
+          )}
+
           <div className="pt-2 flex justify-end gap-2">
             <button
               type="button"
               onClick={() => setIsCashInModalOpen(false)}
-              className="px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl"
+              className="px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl cursor-pointer"
             >
               Cancel
             </button>
@@ -116,7 +139,11 @@ export const CashInModal: React.FC = () => {
               className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-200 text-white font-bold text-sm rounded-xl shadow-xs transition cursor-pointer flex items-center gap-2"
             >
               <ArrowDownRight className="w-4 h-4" />
-              <span>Distribute {formatCurrency(parsedAmount, state.settings.currency)}</span>
+              <span>
+                {isAuthenticated
+                  ? `Distribute ${formatCurrency(parsedAmount, state.settings.currency)}`
+                  : 'Log In / Sign Up to Distribute'}
+              </span>
             </button>
           </div>
         </form>
