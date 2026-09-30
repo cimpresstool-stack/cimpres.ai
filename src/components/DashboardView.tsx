@@ -111,7 +111,7 @@ export const DashboardView: React.FC = () => {
                 </span>
               </h3>
               <p className="text-xs text-slate-300 mt-1 max-w-xl leading-relaxed">
-                Your account is set up with all 7 figures at zero. You can now start feeding in your current business bank balances or record your first cash-inflow distribution.
+                Your account is set up with all 8 figures at zero. You can now start feeding in your current business bank balances or record your first cash-inflow distribution.
               </p>
             </div>
           </div>
@@ -147,13 +147,13 @@ export const DashboardView: React.FC = () => {
         <div className="relative z-10 max-w-3xl">
           <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold mb-3 border border-emerald-400/30">
             <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-            100% Free 7-Account Cash Flow Engine • Active
+            100% Free 8-Account Cash Flow Engine • Active
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mb-2">
-            Every dollar collected feeds your 7 accounts automatically.
+            Every dollar collected feeds your 8 accounts automatically.
           </h2>
           <p className="text-slate-300 text-sm sm:text-base leading-relaxed mb-5">
-            Rent reserved daily. Payroll secured before month-end. Profit ring-fenced first. When cash arrives, the Cimpres algorithm routes each dollar where it belongs in under a second.
+            Rent reserved daily. Payroll secured before month-end. Taxes ring-fenced continuously. Profit protected first. When cash arrives, the Cimpres algorithm routes each dollar where it belongs in under a second.
           </p>
           <div className="flex flex-wrap items-center gap-3">
             <button
@@ -190,7 +190,7 @@ export const DashboardView: React.FC = () => {
               onClick={() => setActiveTab('accounts')}
               className="px-4 py-2.5 rounded-xl bg-transparent hover:bg-white/5 text-slate-300 hover:text-white font-medium text-sm transition flex items-center gap-1 cursor-pointer"
             >
-              <span>7 Accounts Breakdown</span>
+              <span>8 Accounts Breakdown</span>
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
@@ -405,12 +405,12 @@ export const DashboardView: React.FC = () => {
             </div>
           </div>
 
-          {/* Real-time 7-Account Distribution Preview Chips */}
+          {/* Real-time 8-Account Distribution Preview Chips */}
           <div className="pt-3 border-t border-slate-100">
             <div className="text-xs font-semibold text-slate-500 mb-2">
-              Live Split across all 7 Accounts ({formatCurrency(parsedAmount, state.settings.currency)}):
+              Live Split across all 8 Accounts ({formatCurrency(parsedAmount, state.settings.currency)}):
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
               {ACCOUNTS.map((acct) => {
                 const share = livePreview[acct.key] || 0;
                 return (
@@ -440,13 +440,13 @@ export const DashboardView: React.FC = () => {
         </form>
       </div>
 
-      {/* 7 Accounts Live Balance Grid */}
+      {/* 8 Accounts Live Balance Grid */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <div>
-            <h3 className="text-lg font-bold text-slate-900">Current Balances in the 7 Accounts</h3>
+            <h3 className="text-lg font-bold text-slate-900">Current Balances in the 8 Accounts</h3>
             <p className="text-xs text-slate-500">
-              Live funds secured for operations, rent, payroll, and profit reserves.
+              Live funds secured for operations, rent, payroll, taxes, and profit reserves.
             </p>
           </div>
           <button
@@ -458,7 +458,7 @@ export const DashboardView: React.FC = () => {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-3">
           {ACCOUNTS.map((acct) => {
             const bal = state.balances[acct.key] || 0;
             const pct = state.percentages[acct.key] || 0;

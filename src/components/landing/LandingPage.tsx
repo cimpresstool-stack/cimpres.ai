@@ -64,15 +64,16 @@ export const LandingPage: React.FC = () => {
     setSimulatorAmount(num);
   };
 
-  // 7 Account distribution calculations
+  // 8 Account distribution calculations
   const simDistribution = {
-    P: Math.round(simulatorAmount * 0.20), // Ring-fenced profit
-    S: Math.round(simulatorAmount * 0.25), // Salaries & Payroll
+    P: Math.round(simulatorAmount * 0.18), // Ring-fenced profit
+    S: Math.round(simulatorAmount * 0.20), // Salaries & Payroll
     I: Math.round(simulatorAmount * 0.25), // Input Costs / COGS
     M: Math.round(simulatorAmount * 0.10), // Marketing
-    E: Math.round(simulatorAmount * 0.10), // Daily Expenses
-    R: Math.round(simulatorAmount * 0.05), // Rent & Facilities
-    C: Math.round(simulatorAmount * 0.05), // Cash In Clearing
+    E: Math.round(simulatorAmount * 0.05), // Daily Expenses
+    R: Math.round(simulatorAmount * 0.10), // Rent & Facilities
+    C: Math.round(simulatorAmount * 0.02), // Cash In Clearing
+    T: Math.round(simulatorAmount * 0.10), // Tax Reserve
   };
 
   // ROI Calculations
@@ -88,15 +89,15 @@ export const LandingPage: React.FC = () => {
     },
     {
       q: 'How is Cimpres different from traditional accounting tools like QuickBooks or Xero?',
-      a: 'Traditional accounting tools are backward-looking ledgers that record what already happened weeks ago. Cimpres is a forward-operating financial engine. The moment cash arrives or an invoice is settled, Cimpres automatically splits the money into 7 dedicated reserves (Profit, Payroll, Rent, Input Costs, Marketing, Overhead, Cash-In). This prevents cash-flow illusions and ensures you never accidentally spend payroll or tax money on daily expenses.',
+      a: 'Traditional accounting tools are backward-looking ledgers that record what already happened weeks ago. Cimpres is a forward-operating financial engine. The moment cash arrives or an invoice is settled, Cimpres automatically splits the money into 8 dedicated reserves (Profit, Payroll, Rent, Input Costs, Marketing, Overhead, Taxes, Cash-In). This prevents cash-flow illusions and ensures you never accidentally spend payroll or tax money on daily expenses.',
     },
     {
-      q: 'Can our business customize the 7 allocation accounts and percentage splits?',
-      a: 'Yes! While the Cimpres default formula (20% Profit, 25% Payroll, 25% Input Costs, 10% Marketing, 10% Overhead, 5% Rent, 5% Clearing) is mathematically optimized for high-growth service agencies and B2B firms, you can adjust targets and percentage allocations in your Settings anytime.',
+      q: 'Can our business customize the 8 allocation accounts and percentage splits?',
+      a: 'Yes! While the Cimpres default formula (18% Profit, 20% Payroll, 25% Input Costs, 10% Marketing, 5% Overhead, 10% Rent, 10% Taxes, 2% Clearing) is mathematically optimized for high-growth service agencies and B2B firms, you can adjust targets and percentage allocations in your Settings anytime.',
     },
     {
       q: 'How does automated invoicing and instant payment collection work?',
-      a: 'You can generate professional itemized invoices in seconds and send one-click shareable payment links to your clients via Email, SMS, or WhatsApp. When an invoice is paid, Cimpres logs the transaction and automatically splits the funds into your 7 reserve accounts.',
+      a: 'You can generate professional itemized invoices in seconds and send one-click shareable payment links to your clients via Email, SMS, or WhatsApp. When an invoice is paid, Cimpres logs the transaction and automatically splits the funds into your 8 reserve accounts.',
     },
     {
       q: 'Do I need to enter credit card details to start or test drive?',
@@ -114,7 +115,7 @@ export const LandingPage: React.FC = () => {
       <div className="bg-gradient-to-r from-emerald-700 via-teal-700 to-blue-800 text-white text-xs sm:text-sm py-2 px-4 text-center font-medium border-b border-emerald-600/40 flex items-center justify-center gap-2">
         <Sparkles className="w-4 h-4 text-amber-300 shrink-0" />
         <span>
-          <strong className="font-bold">100% Free Forever:</strong> The Automated 7-Account Cash Flow OS & Invoicing Engine is now free for every business.
+          <strong className="font-bold">100% Free Forever:</strong> The Automated 8-Account Cash Flow OS & Invoicing Engine is now free for every business.
         </span>
         <button
           onClick={() => openAuthModal('signup')}
@@ -139,13 +140,13 @@ export const LandingPage: React.FC = () => {
                   100% FREE
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400 hidden sm:block">7-Account Cash Flow Operating System</p>
+              <p className="text-[11px] text-slate-400 hidden sm:block">8-Account Cash Flow Operating System</p>
             </div>
           </div>
 
           {/* Desktop Nav Links */}
           <nav className="hidden lg:flex items-center gap-7 text-sm font-medium text-slate-300">
-            <a href="#simulator" className="hover:text-white transition">7-Account Engine</a>
+            <a href="#simulator" className="hover:text-white transition">8-Account Engine</a>
             <a href="#features" className="hover:text-white transition">Features</a>
             <a href="#calculator" className="hover:text-white transition">Profit ROI</a>
             <a href="#pricing" className="hover:text-white transition">Why 100% Free?</a>
@@ -216,7 +217,7 @@ export const LandingPage: React.FC = () => {
 
             {/* Subhead */}
             <p className="text-lg sm:text-xl text-slate-300 leading-relaxed font-normal mb-8">
-              Traditional accounting looks backwards at history. <strong className="text-white font-semibold">Cimpres</strong> is <span className="text-emerald-400 font-bold">100% free</span> and automatically splits every client payment across <span className="text-blue-400 font-semibold">7 dedicated reserves</span> in real time—locking in founder profit first, automating invoices, and ending cash flow surprises forever.
+              Traditional accounting looks backwards at history. <strong className="text-white font-semibold">Cimpres</strong> is <span className="text-emerald-400 font-bold">100% free</span> and automatically splits every client payment across <span className="text-blue-400 font-semibold">8 dedicated reserves</span> in real time—locking in founder profit first, protecting payroll and taxes, automating invoices, and ending cash flow surprises forever.
             </p>
 
             {/* Dual CTAs */}
@@ -252,12 +253,12 @@ export const LandingPage: React.FC = () => {
               </div>
               <div className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span>Instant 7-account setup</span>
+                <span>Instant 8-account setup</span>
               </div>
             </div>
           </div>
 
-          {/* 4. INTERACTIVE LIVE HERO WIDGET: THE 7-ACCOUNT CASH IN SPLIT SIMULATOR */}
+          {/* 4. INTERACTIVE LIVE HERO WIDGET: THE 8-ACCOUNT CASH IN SPLIT SIMULATOR */}
           <div id="simulator" className="max-w-5xl mx-auto">
             <div className="bg-slate-800/90 backdrop-blur-xl rounded-3xl border border-slate-700 shadow-2xl p-6 sm:p-8 lg:p-10 relative overflow-hidden">
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-6 border-b border-slate-700/80">
@@ -269,7 +270,7 @@ export const LandingPage: React.FC = () => {
                     </span>
                   </div>
                   <h3 className="text-xl sm:text-2xl font-black text-white">
-                    See the Cimpres 7-Account Distribution in Action
+                    See the Cimpres 8-Account Distribution in Action
                   </h3>
                   <p className="text-xs sm:text-sm text-slate-400 mt-1">
                     Choose or enter any client payment amount to watch the instant automatic segregation:
@@ -332,13 +333,13 @@ export const LandingPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* 7 Accounts Grid */}
+              {/* 8 Accounts Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 {/* 1. Ring-Fenced Profit */}
                 <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-extrabold px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300">
-                      [P] Profit (20%)
+                      [P] Profit (18%)
                     </span>
                     <Lock className="w-3.5 h-3.5 text-amber-400" />
                   </div>
@@ -354,7 +355,7 @@ export const LandingPage: React.FC = () => {
                 <div className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/30">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-extrabold px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300">
-                      [S] Payroll (25%)
+                      [S] Payroll (20%)
                     </span>
                     <Users className="w-3.5 h-3.5 text-indigo-400" />
                   </div>
@@ -402,7 +403,7 @@ export const LandingPage: React.FC = () => {
                 <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-extrabold px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-300">
-                      [E] Expenses (10%)
+                      [E] Expenses (5%)
                     </span>
                     <DollarSign className="w-3.5 h-3.5 text-rose-400" />
                   </div>
@@ -418,7 +419,7 @@ export const LandingPage: React.FC = () => {
                 <div className="p-4 rounded-2xl bg-teal-500/10 border border-teal-500/30">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-extrabold px-2 py-0.5 rounded-md bg-teal-500/20 text-teal-300">
-                      [R] Rent Reserve (5%)
+                      [R] Rent Reserve (10%)
                     </span>
                     <Building2 className="w-3.5 h-3.5 text-teal-400" />
                   </div>
@@ -431,10 +432,10 @@ export const LandingPage: React.FC = () => {
                 </div>
 
                 {/* 7. Cash In Clearing */}
-                <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 sm:col-span-2">
+                <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-extrabold px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300">
-                      [C] Cash In Clearing (5%)
+                      [C] Cash In Clearing (2%)
                     </span>
                     <Receipt className="w-3.5 h-3.5 text-emerald-400" />
                   </div>
@@ -442,7 +443,23 @@ export const LandingPage: React.FC = () => {
                     {formatCurrency(simDistribution.C, 'USD')}
                   </p>
                   <p className="text-[11px] text-emerald-200/80 mt-1">
-                    Operating liquidity buffer & transaction reconciliation.
+                    Operating liquidity buffer & reconciliation.
+                  </p>
+                </div>
+
+                {/* 8. Tax Reserve */}
+                <div className="p-4 rounded-2xl bg-orange-500/10 border border-orange-500/30">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-extrabold px-2 py-0.5 rounded-md bg-orange-500/20 text-orange-300">
+                      [T] Tax Reserve (10%)
+                    </span>
+                    <ShieldCheck className="w-3.5 h-3.5 text-orange-400" />
+                  </div>
+                  <p className="text-xl font-black text-white">
+                    {formatCurrency(simDistribution.T, 'USD')}
+                  </p>
+                  <p className="text-[11px] text-orange-200/80 mt-1">
+                    Corporate tax, sales tax, VAT & quarterly filings.
                   </p>
                 </div>
               </div>
@@ -538,7 +555,7 @@ export const LandingPage: React.FC = () => {
             <div className="bg-blue-950/30 border border-blue-500/40 rounded-3xl p-6 sm:p-8 relative shadow-xl shadow-blue-500/10">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-bold mb-6">
                 <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-                <span>✓ THE CIMPRES 7-ACCOUNT DISCIPLINE</span>
+                <span>✓ THE CIMPRES 8-ACCOUNT DISCIPLINE</span>
               </div>
               <ul className="space-y-4 text-sm text-slate-300">
                 <li className="flex items-start gap-3">
@@ -547,11 +564,11 @@ export const LandingPage: React.FC = () => {
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">✓</span>
-                  <span><strong>Profit Ring-Fenced First:</strong> Your 20% founder profit is segregated first, protecting the true bottom line.</span>
+                  <span><strong>Profit Ring-Fenced First:</strong> Your 18% founder profit is segregated first, protecting the true bottom line.</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">✓</span>
-                  <span><strong>Automated Invoicing & Instant Allocation:</strong> Create invoices, send payment links, and partition cash across all 7 accounts automatically the moment settlement occurs.</span>
+                  <span><strong>Automated Invoicing & Instant Allocation:</strong> Create invoices, send payment links, and partition cash across all 8 accounts automatically the moment settlement occurs.</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">✓</span>
@@ -580,7 +597,7 @@ export const LandingPage: React.FC = () => {
             {/* Feature Tabs Switcher */}
             <div className="flex flex-wrap items-center justify-center gap-2 mt-8">
               {[
-                { id: 'distribution', label: '7-Account Distribution', icon: PieChart },
+                { id: 'distribution', label: '8-Account Distribution', icon: PieChart },
                 { id: 'invoicing', label: 'Automated Invoicing', icon: Receipt },
                 { id: 'paylinks', label: 'Payment Links & Settlement', icon: CreditCard },
                 { id: 'reporting', label: 'Real-Time Financial Reports', icon: BarChart3 },
@@ -614,7 +631,7 @@ export const LandingPage: React.FC = () => {
                     <span>CIMPRES METHODOLOGY</span>
                   </div>
                   <h4 className="text-2xl font-black text-white mb-4">
-                    The 7-Account Distribution Engine
+                    The 8-Account Distribution Engine
                   </h4>
                   <p className="text-slate-300 text-sm leading-relaxed mb-6">
                     Every payment that touches your company is partitioned according to strict business math. You always know exactly how much you can spend on team bonuses, ads, and office space without risking financial stability.
@@ -675,7 +692,7 @@ export const LandingPage: React.FC = () => {
                     Automated Pipeline-to-Invoice Generation
                   </h4>
                   <p className="text-slate-300 text-sm leading-relaxed mb-6">
-                    Close a deal in the CRM and watch an invoice generate automatically with items, taxes, and a payment link. When the client pays, Cimpres immediately distributes the cash across the 7 accounts.
+                    Close a deal in the CRM and watch an invoice generate automatically with items, taxes, and a payment link. When the client pays, Cimpres immediately distributes the cash across the 8 accounts.
                   </p>
                   <div className="space-y-3">
                     <div className="flex items-center gap-3 text-sm text-slate-300">
@@ -713,7 +730,7 @@ export const LandingPage: React.FC = () => {
                     <div className="mt-3 pt-3 border-t border-slate-800 flex justify-between items-center text-xs">
                       <span className="text-emerald-400 font-semibold flex items-center gap-1">
                         <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>Split to 7 accounts complete</span>
+                        <span>Split to 8 accounts complete</span>
                       </span>
                       <span className="text-slate-400">Paid via Stripe Link</span>
                     </div>
@@ -747,7 +764,7 @@ export const LandingPage: React.FC = () => {
                     Payment Links & Instant Cash Allocation
                   </h4>
                   <p className="text-slate-300 text-sm leading-relaxed mb-6">
-                    Collect payments effortlessly with one-click shareable checkout links sent via Email, SMS, or WhatsApp. The exact moment an invoice is settled, Cimpres automatically partitions the funds across all 7 accounts in real time.
+                    Collect payments effortlessly with one-click shareable checkout links sent via Email, SMS, or WhatsApp. The exact moment an invoice is settled, Cimpres automatically partitions the funds across all 8 accounts in real time.
                   </p>
                   <div className="space-y-3">
                     <div className="flex items-center gap-3 text-sm text-slate-300">
@@ -756,7 +773,7 @@ export const LandingPage: React.FC = () => {
                     </div>
                     <div className="flex items-center gap-3 text-sm text-slate-300">
                       <Check className="w-4 h-4 text-emerald-400" />
-                      <span>Instant automated deposit recognition and 7-way account segregation</span>
+                      <span>Instant automated deposit recognition and 8-way account segregation</span>
                     </div>
                     <div className="flex items-center gap-3 text-sm text-slate-300">
                       <Check className="w-4 h-4 text-emerald-400" />
@@ -1031,7 +1048,7 @@ export const LandingPage: React.FC = () => {
                   ))}
                 </div>
                 <p className="text-slate-300 text-sm leading-relaxed mb-6">
-                  "Before Cimpres, we were doing $85k/month but consistently sweating rent and payroll checks on the 28th. The 7-account split changed everything. Our payroll reserve is now 100% funded by the 12th of every month."
+                  "Before Cimpres, we were doing $85k/month but consistently sweating rent and payroll checks on the 28th. The 8-account split changed everything. Our payroll reserve is now 100% funded by the 12th of every month."
                 </p>
               </div>
               <div className="pt-4 border-t border-slate-800 flex items-center gap-3">
@@ -1054,7 +1071,7 @@ export const LandingPage: React.FC = () => {
                   ))}
                 </div>
                 <p className="text-slate-300 text-sm leading-relaxed mb-6">
-                  "The automated invoicing and instant payment links save our operations team 10 hours each week. Generating invoices, collecting payment via one-click links, and seeing money split across all 7 accounts instantly is game-changing."
+                  "The automated invoicing and instant payment links save our operations team 10 hours each week. Generating invoices, collecting payment via one-click links, and seeing money split across all 8 accounts instantly is game-changing."
                 </p>
               </div>
               <div className="pt-4 border-t border-slate-800 flex items-center gap-3">
@@ -1105,7 +1122,7 @@ export const LandingPage: React.FC = () => {
               Powerful Financial Discipline Shouldn't Cost $100s/Month.
             </h3>
             <p className="text-base text-slate-400 mt-4">
-              Cimpres is completely free. No trial periods, no hidden fees, no credit card required. Full access to the 7-Account Engine, automated invoicing, and real-time financial reporting for every founder and team.
+              Cimpres is completely free. No trial periods, no hidden fees, no credit card required. Full access to the 8-Account Engine, automated invoicing, and real-time financial reporting for every founder and team.
             </p>
           </div>
 
@@ -1118,7 +1135,7 @@ export const LandingPage: React.FC = () => {
                     <span>LIFETIME UNRESTRICTED ACCESS</span>
                   </div>
                   <h4 className="text-2xl sm:text-3xl font-black text-white">
-                    The Complete 7-Account Operating Suite
+                    The Complete 8-Account Operating Suite
                   </h4>
                   <p className="text-sm text-slate-400 mt-1">
                     Free forever for founders, agencies, consultancies, and high-growth businesses.
@@ -1139,8 +1156,8 @@ export const LandingPage: React.FC = () => {
                 <div className="flex items-start gap-3 p-3.5 rounded-xl bg-slate-900/60 border border-slate-800">
                   <Check className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-sm font-bold text-white">7-Account Automatic Segregation</p>
-                    <p className="text-xs text-slate-400">Ring-fence profit, payroll, rent, and overhead instantly</p>
+                    <p className="text-sm font-bold text-white">8-Account Automatic Segregation</p>
+                    <p className="text-xs text-slate-400">Ring-fence profit, payroll, rent, taxes, and overhead instantly</p>
                   </div>
                 </div>
 

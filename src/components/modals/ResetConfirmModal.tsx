@@ -87,7 +87,7 @@ export const ResetConfirmModal: React.FC = () => {
                 </span>
               </div>
               <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                Sets all 7 account balances to <span className="font-bold text-slate-900">$0.00</span>, clears all sample transactions, clients, deals, and invoices so you can start inputting your live company numbers.
+                Sets all 8 account balances to <span className="font-bold text-slate-900">$0.00</span>, clears all sample transactions, clients, deals, and invoices so you can start inputting your live company numbers.
               </p>
               {!isAuthenticated && (
                 <div className="mt-3 p-2.5 rounded-lg bg-amber-50/80 border border-amber-200 text-amber-900 text-[11px] flex items-start gap-2">
@@ -125,7 +125,7 @@ export const ResetConfirmModal: React.FC = () => {
                 </span>
               </div>
               <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                Loads pre-populated Apex Creative Studio sample data with $60,935 balances across 7 accounts, sample CRM contacts, and sample invoices to test formulas.
+                Loads pre-populated Apex Creative Studio sample data with balances across 8 accounts, sample CRM contacts, and sample invoices to test formulas.
               </p>
             </div>
           </div>

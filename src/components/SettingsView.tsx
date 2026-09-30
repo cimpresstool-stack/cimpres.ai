@@ -207,7 +207,7 @@ export const SettingsView: React.FC = () => {
           <div className="bg-rose-50/70 border border-rose-200 rounded-2xl p-6">
             <h4 className="text-sm font-bold text-rose-900 mb-1">Reset Sandbox Data</h4>
             <p className="text-xs text-rose-700 mb-4">
-              Restores all sample contacts, deals, invoices, and 7-account balances to standard initial demo state.
+              Restores all sample contacts, deals, invoices, and 8-account balances to standard initial demo state.
             </p>
             <button
               type="button"
@@ -221,14 +221,14 @@ export const SettingsView: React.FC = () => {
           </div>
         </div>
 
-        {/* 7 Account Allocation Percentages */}
+        {/* 8 Account Allocation Percentages */}
         <div className="lg:col-span-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
               <div className="flex items-center gap-2">
                 <PieChart className="w-5 h-5 text-emerald-600" />
                 <h3 className="text-base font-bold text-slate-900">
-                  7-Account Allocation Split Algorithm
+                  8-Account Allocation Split Algorithm
                 </h3>
               </div>
               <span

@@ -41,7 +41,7 @@ export const CashInModal: React.FC = () => {
             </div>
             <div>
               <h3 className="text-base font-bold text-slate-900">Record Cash Inflow</h3>
-              <p className="text-xs text-slate-500">Auto-routes into all 7 CIMPRES accounts</p>
+              <p className="text-xs text-slate-500">Auto-routes into all 8 CIMPRES accounts</p>
             </div>
           </div>
           <button
@@ -89,10 +89,10 @@ export const CashInModal: React.FC = () => {
             />
           </div>
 
-          {/* Real-time 7-Account Distribution Preview */}
+          {/* Real-time 8-Account Distribution Preview */}
           <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
             <div className="flex items-center justify-between text-xs font-bold text-slate-700 mb-2">
-              <span>Automatic 7-Account Split Preview:</span>
+              <span>Automatic 8-Account Split Preview:</span>
               <span className="text-emerald-700 font-mono">100% Allocated</span>
             </div>
 

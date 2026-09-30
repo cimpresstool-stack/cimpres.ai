@@ -150,7 +150,7 @@ export const AuthModal: React.FC = () => {
           </h2>
           <p className="text-sm text-slate-300">
             {authModalMode === 'login'
-              ? 'Access real-time 7-account cash flow, automated invoicing, and profit allocations.'
+              ? 'Access real-time 8-account cash flow, automated invoicing, and profit allocations.'
               : '100% free for everyone. No credit card, no subscription fees, no limits.'}
           </p>
 

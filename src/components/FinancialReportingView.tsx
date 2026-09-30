@@ -53,13 +53,14 @@ export const FinancialReportingView: React.FC = () => {
   const rentCosts = state.balances.R || 0;
   const dailyExpenses = state.balances.E || 0;
   const salaries = state.balances.S || 0;
-  const totalOperatingReserves = inputCosts + marketingCosts + rentCosts + dailyExpenses + salaries;
+  const taxes = state.balances.T || 0;
+  const totalOperatingReserves = inputCosts + marketingCosts + rentCosts + dailyExpenses + salaries + taxes;
 
   // Pipeline weighted addition
   const openDeals = state.deals.filter((d) => d.stage !== 'won' && d.stage !== 'lost');
   const weightedPipeline = openDeals.reduce((sum, d) => sum + d.value * d.probability, 0);
 
-  // 7 Account distribution data for Pie Chart
+  // 8 Account distribution data for Pie Chart
   const pieData = ACCOUNTS.map((a) => ({
     name: a.name,
     short: a.short,
@@ -108,6 +109,7 @@ export const FinancialReportingView: React.FC = () => {
       `Rent & Facility Lease Reserve,${rentCosts}`,
       `Marketing & Acquisition Fund,${marketingCosts}`,
       `Daily Operating Overhead,${dailyExpenses}`,
+      `Tax Reserve Provision (Taxes),${taxes}`,
       `NET PROFIT RING-FENCED,${profitReserve}`,
       ``,
       `PIPELINE WEIGHTED FORECAST,${weightedPipeline}`,
@@ -205,7 +207,7 @@ export const FinancialReportingView: React.FC = () => {
         </div>
       </div>
 
-      {/* Charts Row: Historical Cash Flow & 7-Account Distribution Pie */}
+      {/* Charts Row: Historical Cash Flow & 8-Account Distribution Pie */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Revenue & Profit Growth Area Chart */}
         <div className="lg:col-span-7 bg-white rounded-2xl p-6 border border-slate-200 shadow-xs">
@@ -272,15 +274,15 @@ export const FinancialReportingView: React.FC = () => {
           </div>
         </div>
 
-        {/* 7 Accounts Distribution Donut/Pie Chart */}
+        {/* 8 Accounts Distribution Donut/Pie Chart */}
         <div className="lg:col-span-5 bg-white rounded-2xl p-6 border border-slate-200 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-base font-bold text-slate-900">7-Account Allocation Split</h3>
+              <h3 className="text-base font-bold text-slate-900">8-Account Allocation Split</h3>
               <PieIcon className="w-4 h-4 text-slate-400" />
             </div>
             <p className="text-xs text-slate-500 mb-4">
-              Current proportion of total liquidity across all 7 accounts
+              Current proportion of total liquidity across all 8 accounts
             </p>
 
             <div className="h-56 w-full flex items-center justify-center">
@@ -390,6 +392,12 @@ export const FinancialReportingView: React.FC = () => {
                 <span>Daily Operating Expenses ({state.percentages.E}%)</span>
                 <span className="font-mono text-rose-600">
                   -{formatCurrency(dailyExpenses, state.settings.currency)}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>Tax Reserve Provision ({state.percentages.T}%)</span>
+                <span className="font-mono text-rose-600">
+                  -{formatCurrency(taxes, state.settings.currency)}
                 </span>
               </div>
             </div>

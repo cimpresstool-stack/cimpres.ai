@@ -56,7 +56,7 @@ export const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
       items: [
         { id: 'dashboard', label: 'Cockpit Overview', icon: LayoutDashboard },
         { id: 'cashin', label: 'Record Cash In', icon: ArrowDownRight },
-        { id: 'accounts', label: '7 Accounts Breakdown', icon: PieChart },
+        { id: 'accounts', label: '8 Accounts Breakdown', icon: PieChart },
         { id: 'reports', label: 'Financial Reports & P&L', icon: BarChart3 },
       ],
     },
@@ -110,7 +110,7 @@ export const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                   100% FREE
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400 font-medium">7-Account Cash Flow OS</p>
+              <p className="text-[11px] text-slate-400 font-medium">8-Account Cash Flow OS</p>
             </div>
           </div>
         </div>

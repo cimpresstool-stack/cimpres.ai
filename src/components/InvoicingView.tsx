@@ -70,7 +70,7 @@ export const InvoicingView: React.FC = () => {
             Automated Invoicing & Billing
           </h2>
           <p className="text-sm text-slate-500">
-            Invoices generated automatically when deals are Won, with instant payment links and 7-account cash routing.
+            Invoices generated automatically when deals are Won, with instant payment links and 8-account cash routing.
           </p>
         </div>
 
@@ -249,7 +249,7 @@ export const InvoicingView: React.FC = () => {
                       {!isPaid && (
                         <button
                           onClick={() => updateInvoiceStatus(inv.id, 'paid', 'Instant Online Transfer')}
-                          title="Simulate client payment — automatically routes into 7 accounts"
+                          title="Simulate client payment — automatically routes into 8 accounts"
                           className="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-xs transition cursor-pointer"
                         >
                           Pay & Allocate

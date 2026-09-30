@@ -203,7 +203,7 @@ export const InvoicePreviewModal: React.FC = () => {
             {isPaid ? (
               <span className="text-emerald-700 font-bold flex items-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                <span>Invoice settled & split into 7 reserve accounts</span>
+                <span>Invoice settled & split into 8 reserve accounts</span>
               </span>
             ) : (
               <span>Ready to receive online payment via card or wire</span>

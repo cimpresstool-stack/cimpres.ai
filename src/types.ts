@@ -1,4 +1,4 @@
-export type AccountKey = 'C' | 'I' | 'M' | 'P' | 'R' | 'E' | 'S';
+export type AccountKey = 'C' | 'I' | 'M' | 'P' | 'R' | 'E' | 'S' | 'T';
 
 export interface AccountInfo {
   key: AccountKey;

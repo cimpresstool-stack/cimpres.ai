@@ -139,13 +139,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (parsedUser?.id && parsedUser.id !== 'demo-guest-user') {
           const userStateStr = localStorage.getItem(`cimpres_state_user_${parsedUser.id}`);
           if (userStateStr) {
-            return JSON.parse(userStateStr);
+            const parsed = JSON.parse(userStateStr);
+            return {
+              ...parsed,
+              balances: { ...ZERO_BALANCES, ...(parsed.balances || {}) },
+              percentages: { ...INITIAL_PERCENTAGES, ...(parsed.percentages || {}) },
+            };
           }
         }
       }
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        return {
+          ...parsed,
+          balances: { ...ZERO_BALANCES, ...(parsed.balances || {}) },
+          percentages: { ...INITIAL_PERCENTAGES, ...(parsed.percentages || {}) },
+        };
       }
     } catch {
       // Fallback to initial
@@ -223,8 +233,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             if (stateSnap.exists()) {
               const loadedData = stateSnap.data() as Partial<AppState>;
               const fullState: AppState = {
-                balances: loadedData.balances || { ...ZERO_BALANCES },
-                percentages: loadedData.percentages || { ...INITIAL_PERCENTAGES },
+                balances: { ...ZERO_BALANCES, ...(loadedData.balances || {}) },
+                percentages: { ...INITIAL_PERCENTAGES, ...(loadedData.percentages || {}) },
                 settings: {
                   currency: loadedData.settings?.currency || '$',
                   businessName: loadedData.settings?.businessName || userProfile.companyName || 'My Enterprise',
@@ -254,8 +264,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               const userSaved = localStorage.getItem(`cimpres_state_user_${fbUser.uid}`);
               if (userSaved) {
                 const parsed = JSON.parse(userSaved);
-                setState(parsed);
-                setDoc(stateDocRef, parsed).catch((e) => console.warn(e));
+                const mergedParsed: AppState = {
+                  ...parsed,
+                  balances: { ...ZERO_BALANCES, ...(parsed.balances || {}) },
+                  percentages: { ...INITIAL_PERCENTAGES, ...(parsed.percentages || {}) },
+                };
+                setState(mergedParsed);
+                setDoc(stateDocRef, mergedParsed).catch((e) => console.warn(e));
               } else {
                 // New user without state -> initialize with ZERO figures
                 const cleanState = createCleanBusinessState(userProfile.companyName, userProfile.email);
@@ -405,7 +420,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
     } catch {}
 
-    showToast(`Distributed ${state.settings.currency}${num.toLocaleString()} across 7 accounts`);
+    showToast(`Distributed ${state.settings.currency}${num.toLocaleString()} across 8 accounts`);
     return newTx;
   };
 
@@ -752,7 +767,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (invoiceToFund) {
       const inv = invoiceToFund as Invoice;
       recordCashIn(inv.total, `Automated Invoice Settlement: ${inv.invoiceNum} (${inv.contactName})`);
-      showToast(`Invoice ${inv.invoiceNum} marked PAID and routed into 7 accounts!`);
+      showToast(`Invoice ${inv.invoiceNum} marked PAID and routed into 8 accounts!`);
     } else {
       showToast(`Invoice updated to ${status}`);
     }
@@ -1043,7 +1058,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           setDoc(stateDocRef, cleanZeroState).catch((err) => console.warn(err));
         } catch (e) {}
       }
-      showToast('All 7 account figures reset to zero. Ready for your business numbers!');
+      showToast('All 8 account figures reset to zero. Ready for your business numbers!');
     } else {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanZeroState));
@@ -1127,7 +1142,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         createdAt: new Date().toISOString(),
       };
 
-      // Initialize clean slate with ZERO figures for all 7 accounts
+      // Initialize clean slate with ZERO figures for all 8 accounts
       const cleanState = createCleanBusinessState(cleanCompany, cleanEmail);
       setState(cleanState);
 

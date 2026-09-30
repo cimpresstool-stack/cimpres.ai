@@ -97,7 +97,7 @@ export const AdjustBalanceModal: React.FC = () => {
           </button>
         </div>
 
-        {/* 7 Account Selector Tabs */}
+        {/* 8 Account Selector Tabs */}
         <div className="px-5 pt-3 pb-2 border-b border-slate-100 bg-slate-50/70 overflow-x-auto flex items-center gap-1.5 scrollbar-none">
           {ACCOUNTS.map((a) => {
             const isSelected = a.key === selectedKey;

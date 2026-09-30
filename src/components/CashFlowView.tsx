@@ -63,7 +63,7 @@ export const CashFlowView: React.FC = () => {
   };
 
   const handleExportCSV = () => {
-    const headers = ['Date', 'Type', 'Amount', 'Note', 'Dist_C', 'Dist_I', 'Dist_M', 'Dist_P', 'Dist_R', 'Dist_E', 'Dist_S'];
+    const headers = ['Date', 'Type', 'Amount', 'Note', 'Dist_C', 'Dist_I', 'Dist_M', 'Dist_P', 'Dist_R', 'Dist_E', 'Dist_S', 'Dist_T'];
     const rows = state.transactions.map((t) => [
       t.date,
       t.type,
@@ -76,6 +76,7 @@ export const CashFlowView: React.FC = () => {
       t.dist?.R || 0,
       t.dist?.E || 0,
       t.dist?.S || 0,
+      t.dist?.T || 0,
     ]);
 
     const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
@@ -97,7 +98,7 @@ export const CashFlowView: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      {/* 7-Account Engine Architectural Explanation Banner */}
+      {/* 8-Account Engine Architectural Explanation Banner */}
       <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-slate-100">
           <div>
@@ -106,7 +107,7 @@ export const CashFlowView: React.FC = () => {
               The CIMPRES Money Router
             </div>
             <h2 className="text-2xl font-black text-slate-900 tracking-tight">
-              One Entry Pool. Seven Dedicated Reserves.
+              One Entry Pool. Eight Dedicated Reserves.
             </h2>
             <p className="text-sm text-slate-600 mt-1 max-w-2xl">
               Traditional businesses mix all money into one general checking account and hope expenses don't outrun sales. Cimpres enforces financial solvency by partitioning every inflow upon arrival.
@@ -165,7 +166,7 @@ export const CashFlowView: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3 mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-4">
               {ACCOUNTS.map((acct) => (
                 <div key={acct.key} className="p-3 bg-white rounded-xl border border-slate-200">
                   <div className="flex items-center justify-between text-xs font-bold mb-1">
@@ -215,8 +216,8 @@ export const CashFlowView: React.FC = () => {
           </div>
         )}
 
-        {/* 7 Accounts Display Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3 mt-6">
+        {/* 8 Accounts Display Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mt-6">
           {ACCOUNTS.map((acct) => {
             const balance = state.balances[acct.key] || 0;
             const pct = state.percentages[acct.key] || 0;
@@ -333,6 +334,12 @@ export const CashFlowView: React.FC = () => {
               <span>Automatic payroll reserve:</span>
               <span className="font-bold text-slate-900">
                 +{formatCurrency(previewSplit.S || 0, state.settings.currency)}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span>Tax reserve provision:</span>
+              <span className="font-bold text-slate-900">
+                +{formatCurrency(previewSplit.T || 0, state.settings.currency)}
               </span>
             </div>
             <div className="flex justify-between text-emerald-700 font-semibold">

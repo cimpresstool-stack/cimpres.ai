@@ -61,7 +61,7 @@ export const PaymentLinksView: React.FC = () => {
             Direct Payment Links
           </h2>
           <p className="text-sm text-slate-500">
-            Send one-click payment links via email, SMS or WhatsApp. When paid, funds auto-split into your 7 accounts.
+            Send one-click payment links via email, SMS or WhatsApp. When paid, funds auto-split into your 8 accounts.
           </p>
         </div>
 
@@ -205,7 +205,7 @@ export const PaymentLinksView: React.FC = () => {
                       {formatCurrency(link.amount, state.settings.currency)}
                     </span>
                     <span className="text-[11px] text-slate-400">
-                      {isPaid ? 'Settled to 7 accounts' : 'Awaiting payment'}
+                      {isPaid ? 'Settled to 8 accounts' : 'Awaiting payment'}
                     </span>
                   </div>
 

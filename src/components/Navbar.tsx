@@ -61,7 +61,7 @@ export const Navbar: React.FC<{ onToggleMobileSidebar?: () => void }> = ({
                 {activeTab === 'cashin'
                   ? 'Record Cash In'
                   : activeTab === 'accounts'
-                  ? '7-Account Cash Engine'
+                  ? '8-Account Cash Engine'
                   : activeTab === 'invoices'
                   ? 'Automated Invoicing'
                   : activeTab === 'pipeline'
@@ -86,7 +86,7 @@ export const Navbar: React.FC<{ onToggleMobileSidebar?: () => void }> = ({
               </span>
             </div>
             <p className="text-xs text-slate-500 hidden sm:block">
-              {state.settings.businessName} • Connected to 7-Account Distribution
+              {state.settings.businessName} • Connected to 8-Account Distribution
             </p>
           </div>
         </div>

@@ -68,7 +68,7 @@ export const PipelineView: React.FC = () => {
             Sales Pipeline & Deal Forecasting
           </h2>
           <p className="text-sm text-slate-500">
-            Drag or advance deals through the funnel. Winning a deal triggers automated invoice generation and 7-account allocation.
+            Drag or advance deals through the funnel. Winning a deal triggers automated invoice generation and 8-account allocation.
           </p>
         </div>
 

@@ -222,7 +222,7 @@ export const NewInvoiceModal: React.FC = () => {
                 Simulate Instant Payment Upon Creation
               </span>
               <span className="text-[11px] text-emerald-700">
-                Immediately marks invoice as paid and routes {formatCurrency(total, state.settings.currency)} into the 7 accounts.
+                Immediately marks invoice as paid and routes {formatCurrency(total, state.settings.currency)} into the 8 accounts.
               </span>
             </div>
             <input
