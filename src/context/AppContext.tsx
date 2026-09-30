@@ -130,6 +130,29 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+// Target default percentages specified by user:
+// Cash In: 2%, Input Cost: 75%, Marketing: 3%, Profit: 3%, Rent: 5%, Expenses: 3%, Salaries: 6%, Taxes: 3%
+const isTargetScheme = (p?: Record<string, number>): boolean => {
+  if (!p) return false;
+  return (
+    p.C === 2 &&
+    p.I === 75 &&
+    p.M === 3 &&
+    p.P === 3 &&
+    p.R === 5 &&
+    p.E === 3 &&
+    p.S === 6 &&
+    p.T === 3
+  );
+};
+
+const resolveInitialPercentages = (savedPcts?: Record<string, number>): Record<AccountKey, number> => {
+  if (!savedPcts || !isTargetScheme(savedPcts)) {
+    return { ...INITIAL_PERCENTAGES };
+  }
+  return savedPcts as Record<AccountKey, number>;
+};
+
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, setState] = useState<AppState>(() => {
     try {
@@ -143,7 +166,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             return {
               ...parsed,
               balances: { ...ZERO_BALANCES, ...(parsed.balances || {}) },
-              percentages: { ...INITIAL_PERCENTAGES, ...(parsed.percentages || {}) },
+              percentages: resolveInitialPercentages(parsed.percentages),
             };
           }
         }
@@ -154,7 +177,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return {
           ...parsed,
           balances: { ...ZERO_BALANCES, ...(parsed.balances || {}) },
-          percentages: { ...INITIAL_PERCENTAGES, ...(parsed.percentages || {}) },
+          percentages: resolveInitialPercentages(parsed.percentages),
         };
       }
     } catch {
@@ -234,7 +257,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               const loadedData = stateSnap.data() as Partial<AppState>;
               const fullState: AppState = {
                 balances: { ...ZERO_BALANCES, ...(loadedData.balances || {}) },
-                percentages: { ...INITIAL_PERCENTAGES, ...(loadedData.percentages || {}) },
+                percentages: resolveInitialPercentages(loadedData.percentages),
                 settings: {
                   currency: loadedData.settings?.currency || '$',
                   businessName: loadedData.settings?.businessName || userProfile.companyName || 'My Enterprise',
@@ -267,7 +290,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 const mergedParsed: AppState = {
                   ...parsed,
                   balances: { ...ZERO_BALANCES, ...(parsed.balances || {}) },
-                  percentages: { ...INITIAL_PERCENTAGES, ...(parsed.percentages || {}) },
+                  percentages: resolveInitialPercentages(parsed.percentages),
                 };
                 setState(mergedParsed);
                 setDoc(stateDocRef, mergedParsed).catch((e) => console.warn(e));
@@ -314,6 +337,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
 
     return () => unsubscribe();
+  }, []);
+
+  // Guarantee active workspace adopts the new default percentages (Cash In 2%, Input 75%, Marketing 3%, Profit 3%, Rent 5%, Expenses 3%, Salaries 6%, Taxes 3%)
+  useEffect(() => {
+    if (!isTargetScheme(state.percentages)) {
+      setState((prev) => ({
+        ...prev,
+        percentages: { ...INITIAL_PERCENTAGES },
+      }));
+    }
   }, []);
 
   const [isCashInModalOpen, setIsCashInModalOpen] = useState<boolean>(false);

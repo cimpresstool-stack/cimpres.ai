@@ -23,7 +23,7 @@ export const ACCOUNTS: AccountInfo[] = [
     borderLight: 'border-amber-200',
     badgeBg: 'bg-amber-100',
     badgeText: 'text-amber-800',
-    defaultPct: 30,
+    defaultPct: 75,
   },
   {
     key: 'M',
@@ -35,7 +35,7 @@ export const ACCOUNTS: AccountInfo[] = [
     borderLight: 'border-purple-200',
     badgeBg: 'bg-purple-100',
     badgeText: 'text-purple-700',
-    defaultPct: 10,
+    defaultPct: 3,
   },
   {
     key: 'P',
@@ -47,7 +47,7 @@ export const ACCOUNTS: AccountInfo[] = [
     borderLight: 'border-emerald-200',
     badgeBg: 'bg-emerald-100',
     badgeText: 'text-emerald-700',
-    defaultPct: 20,
+    defaultPct: 3,
   },
   {
     key: 'R',
@@ -59,7 +59,7 @@ export const ACCOUNTS: AccountInfo[] = [
     borderLight: 'border-cyan-200',
     badgeBg: 'bg-cyan-100',
     badgeText: 'text-cyan-800',
-    defaultPct: 12,
+    defaultPct: 5,
   },
   {
     key: 'E',
@@ -71,7 +71,7 @@ export const ACCOUNTS: AccountInfo[] = [
     borderLight: 'border-rose-200',
     badgeBg: 'bg-rose-100',
     badgeText: 'text-rose-700',
-    defaultPct: 5,
+    defaultPct: 3,
   },
   {
     key: 'S',
@@ -83,7 +83,7 @@ export const ACCOUNTS: AccountInfo[] = [
     borderLight: 'border-indigo-200',
     badgeBg: 'bg-indigo-100',
     badgeText: 'text-indigo-700',
-    defaultPct: 20,
+    defaultPct: 6,
   },
   {
     key: 'T',
@@ -95,19 +95,19 @@ export const ACCOUNTS: AccountInfo[] = [
     borderLight: 'border-orange-200',
     badgeBg: 'bg-orange-100',
     badgeText: 'text-orange-800',
-    defaultPct: 10,
+    defaultPct: 3,
   },
 ];
 
 export const INITIAL_PERCENTAGES: Record<AccountKey, number> = {
   C: 2,
-  I: 25,
-  M: 10,
-  P: 18,
-  R: 10,
-  E: 5,
-  S: 20,
-  T: 10,
+  I: 75,
+  M: 3,
+  P: 3,
+  R: 5,
+  E: 3,
+  S: 6,
+  T: 3,
 };
 
 export const INITIAL_BALANCES: Record<AccountKey, number> = {

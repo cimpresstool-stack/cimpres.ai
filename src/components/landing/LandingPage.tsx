@@ -66,14 +66,14 @@ export const LandingPage: React.FC = () => {
 
   // 8 Account distribution calculations
   const simDistribution = {
-    P: Math.round(simulatorAmount * 0.18), // Ring-fenced profit
-    S: Math.round(simulatorAmount * 0.20), // Salaries & Payroll
-    I: Math.round(simulatorAmount * 0.25), // Input Costs / COGS
-    M: Math.round(simulatorAmount * 0.10), // Marketing
-    E: Math.round(simulatorAmount * 0.05), // Daily Expenses
-    R: Math.round(simulatorAmount * 0.10), // Rent & Facilities
-    C: Math.round(simulatorAmount * 0.02), // Cash In Clearing
-    T: Math.round(simulatorAmount * 0.10), // Tax Reserve
+    C: Math.round(simulatorAmount * 0.02), // Cash In Clearing (2%)
+    I: Math.round(simulatorAmount * 0.75), // Input Costs / COGS (75%)
+    M: Math.round(simulatorAmount * 0.03), // Marketing (3%)
+    P: Math.round(simulatorAmount * 0.03), // Ring-fenced profit (3%)
+    R: Math.round(simulatorAmount * 0.05), // Rent & Facilities (5%)
+    E: Math.round(simulatorAmount * 0.03), // Daily Expenses (3%)
+    S: Math.round(simulatorAmount * 0.06), // Salaries & Payroll (6%)
+    T: Math.round(simulatorAmount * 0.03), // Tax Reserve (3%)
   };
 
   // ROI Calculations
@@ -93,7 +93,7 @@ export const LandingPage: React.FC = () => {
     },
     {
       q: 'Can our business customize the 8 allocation accounts and percentage splits?',
-      a: 'Yes! While the Cimpres default formula (18% Profit, 20% Payroll, 25% Input Costs, 10% Marketing, 5% Overhead, 10% Rent, 10% Taxes, 2% Clearing) is mathematically optimized for high-growth service agencies and B2B firms, you can adjust targets and percentage allocations in your Settings anytime.',
+      a: 'Yes! While the Cimpres default formula (75% Input Costs, 6% Salaries, 5% Rent, 3% Profit, 3% Marketing, 3% Expenses, 3% Taxes, 2% Cash In) is mathematically optimized for high-performance operations, you can adjust targets and percentage allocations in your Settings anytime.',
     },
     {
       q: 'How does automated invoicing and instant payment collection work?',
@@ -335,19 +335,19 @@ export const LandingPage: React.FC = () => {
 
               {/* 8 Accounts Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {/* 1. Ring-Fenced Profit */}
+                {/* 1. Direct Input Costs */}
                 <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-extrabold px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300">
-                      [P] Profit (18%)
+                      [I] Input Costs (75%)
                     </span>
-                    <Lock className="w-3.5 h-3.5 text-amber-400" />
+                    <Layers className="w-3.5 h-3.5 text-amber-400" />
                   </div>
                   <p className="text-xl font-black text-white">
-                    {formatCurrency(simDistribution.P, 'USD')}
+                    {formatCurrency(simDistribution.I, 'USD')}
                   </p>
                   <p className="text-[11px] text-amber-200/80 mt-1">
-                    Locked for founder dividends & reserves first.
+                    Direct supplies, inventory & costs of goods sold.
                   </p>
                 </div>
 
@@ -355,7 +355,7 @@ export const LandingPage: React.FC = () => {
                 <div className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/30">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-extrabold px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300">
-                      [S] Payroll (20%)
+                      [S] Payroll (6%)
                     </span>
                     <Users className="w-3.5 h-3.5 text-indigo-400" />
                   </div>
@@ -367,27 +367,43 @@ export const LandingPage: React.FC = () => {
                   </p>
                 </div>
 
-                {/* 3. Input Costs (COGS) */}
-                <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/30">
+                {/* 3. Rent & Facilities */}
+                <div className="p-4 rounded-2xl bg-teal-500/10 border border-teal-500/30">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-extrabold px-2 py-0.5 rounded-md bg-blue-500/20 text-blue-300">
-                      [I] Input Costs (25%)
+                    <span className="text-xs font-extrabold px-2 py-0.5 rounded-md bg-teal-500/20 text-teal-300">
+                      [R] Rent Reserve (5%)
                     </span>
-                    <Layers className="w-3.5 h-3.5 text-blue-400" />
+                    <Building2 className="w-3.5 h-3.5 text-teal-400" />
                   </div>
                   <p className="text-xl font-black text-white">
-                    {formatCurrency(simDistribution.I, 'USD')}
+                    {formatCurrency(simDistribution.R, 'USD')}
                   </p>
-                  <p className="text-[11px] text-blue-200/80 mt-1">
-                    Contractors, production & raw materials.
+                  <p className="text-[11px] text-teal-200/80 mt-1">
+                    Premises & physical facilities buffer.
                   </p>
                 </div>
 
-                {/* 4. Marketing */}
+                {/* 4. Ring-Fenced Profit */}
+                <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-extrabold px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300">
+                      [P] Profit (3%)
+                    </span>
+                    <Lock className="w-3.5 h-3.5 text-emerald-400" />
+                  </div>
+                  <p className="text-xl font-black text-white">
+                    {formatCurrency(simDistribution.P, 'USD')}
+                  </p>
+                  <p className="text-[11px] text-emerald-200/80 mt-1">
+                    Locked for founder dividends & reserves first.
+                  </p>
+                </div>
+
+                {/* 5. Marketing */}
                 <div className="p-4 rounded-2xl bg-violet-500/10 border border-violet-500/30">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-extrabold px-2 py-0.5 rounded-md bg-violet-500/20 text-violet-300">
-                      [M] Marketing (10%)
+                      [M] Marketing (3%)
                     </span>
                     <TrendingUp className="w-3.5 h-3.5 text-violet-400" />
                   </div>
@@ -399,11 +415,11 @@ export const LandingPage: React.FC = () => {
                   </p>
                 </div>
 
-                {/* 5. Daily Expenses */}
+                {/* 6. Daily Expenses */}
                 <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-extrabold px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-300">
-                      [E] Expenses (5%)
+                      [E] Expenses (3%)
                     </span>
                     <DollarSign className="w-3.5 h-3.5 text-rose-400" />
                   </div>
@@ -415,43 +431,11 @@ export const LandingPage: React.FC = () => {
                   </p>
                 </div>
 
-                {/* 6. Rent Reserve */}
-                <div className="p-4 rounded-2xl bg-teal-500/10 border border-teal-500/30">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-extrabold px-2 py-0.5 rounded-md bg-teal-500/20 text-teal-300">
-                      [R] Rent Reserve (10%)
-                    </span>
-                    <Building2 className="w-3.5 h-3.5 text-teal-400" />
-                  </div>
-                  <p className="text-xl font-black text-white">
-                    {formatCurrency(simDistribution.R, 'USD')}
-                  </p>
-                  <p className="text-[11px] text-teal-200/80 mt-1">
-                    Premises & facilities buffer.
-                  </p>
-                </div>
-
-                {/* 7. Cash In Clearing */}
-                <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-extrabold px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300">
-                      [C] Cash In Clearing (2%)
-                    </span>
-                    <Receipt className="w-3.5 h-3.5 text-emerald-400" />
-                  </div>
-                  <p className="text-xl font-black text-white">
-                    {formatCurrency(simDistribution.C, 'USD')}
-                  </p>
-                  <p className="text-[11px] text-emerald-200/80 mt-1">
-                    Operating liquidity buffer & reconciliation.
-                  </p>
-                </div>
-
-                {/* 8. Tax Reserve */}
+                {/* 7. Tax Reserve */}
                 <div className="p-4 rounded-2xl bg-orange-500/10 border border-orange-500/30">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-extrabold px-2 py-0.5 rounded-md bg-orange-500/20 text-orange-300">
-                      [T] Tax Reserve (10%)
+                      [T] Tax Reserve (3%)
                     </span>
                     <ShieldCheck className="w-3.5 h-3.5 text-orange-400" />
                   </div>
@@ -460,6 +444,22 @@ export const LandingPage: React.FC = () => {
                   </p>
                   <p className="text-[11px] text-orange-200/80 mt-1">
                     Corporate tax, sales tax, VAT & quarterly filings.
+                  </p>
+                </div>
+
+                {/* 8. Cash In Clearing */}
+                <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/30">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-extrabold px-2 py-0.5 rounded-md bg-blue-500/20 text-blue-300">
+                      [C] Cash In Clearing (2%)
+                    </span>
+                    <Receipt className="w-3.5 h-3.5 text-blue-400" />
+                  </div>
+                  <p className="text-xl font-black text-white">
+                    {formatCurrency(simDistribution.C, 'USD')}
+                  </p>
+                  <p className="text-[11px] text-blue-200/80 mt-1">
+                    Operating liquidity buffer & reconciliation.
                   </p>
                 </div>
               </div>
@@ -564,7 +564,7 @@ export const LandingPage: React.FC = () => {
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">✓</span>
-                  <span><strong>Profit Ring-Fenced First:</strong> Your 18% founder profit is segregated first, protecting the true bottom line.</span>
+                  <span><strong>Profit Ring-Fenced First:</strong> Your 3% founder profit is segregated first, protecting the true bottom line.</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">✓</span>
@@ -804,16 +804,16 @@ export const LandingPage: React.FC = () => {
                     <p className="text-xs text-slate-400">Client: Horizon Health • $18,500.00</p>
                     <div className="mt-3 p-3 rounded-lg bg-slate-950/80 border border-slate-800 text-xs space-y-1.5">
                       <div className="flex justify-between text-slate-300">
-                        <span>Automated 20% Profit:</span>
-                        <span className="text-amber-400 font-bold">$3,700.00</span>
+                        <span>Input Costs (75%):</span>
+                        <span className="text-amber-400 font-bold">$13,875.00</span>
                       </div>
                       <div className="flex justify-between text-slate-300">
-                        <span>Automated 25% Payroll:</span>
-                        <span className="text-indigo-400 font-bold">$4,625.00</span>
+                        <span>Payroll & Salaries (6%):</span>
+                        <span className="text-indigo-400 font-bold">$1,110.00</span>
                       </div>
                       <div className="flex justify-between text-slate-300">
-                        <span>COGS, Tax & Reserves:</span>
-                        <span className="text-blue-400 font-bold">$10,175.00</span>
+                        <span>Profit, Rent, Taxes & Reserves (19%):</span>
+                        <span className="text-emerald-400 font-bold">$3,515.00</span>
                       </div>
                     </div>
                   </div>
@@ -877,24 +877,32 @@ export const LandingPage: React.FC = () => {
                       <span className="font-bold text-white">$142,500</span>
                     </div>
                     <div className="flex justify-between text-slate-300">
-                      <span>Input Costs (COGS 25%):</span>
-                      <span className="text-blue-400 font-bold">-$35,625</span>
+                      <span>Input Costs (COGS 75%):</span>
+                      <span className="text-amber-400 font-bold">-$106,875</span>
                     </div>
                     <div className="flex justify-between text-slate-300">
-                      <span>Payroll & Salaries (25%):</span>
-                      <span className="text-indigo-400 font-bold">-$35,625</span>
+                      <span>Payroll & Salaries (6%):</span>
+                      <span className="text-indigo-400 font-bold">-$8,550</span>
                     </div>
                     <div className="flex justify-between text-slate-300">
-                      <span>Marketing & Acquisition (10%):</span>
-                      <span className="text-violet-400 font-bold">-$14,250</span>
+                      <span>Rent & Facilities (5%):</span>
+                      <span className="text-teal-400 font-bold">-$7,125</span>
                     </div>
                     <div className="flex justify-between text-slate-300">
-                      <span>Rent & Overhead (15%):</span>
-                      <span className="text-rose-400 font-bold">-$21,375</span>
+                      <span>Marketing (3%):</span>
+                      <span className="text-violet-400 font-bold">-$4,275</span>
+                    </div>
+                    <div className="flex justify-between text-slate-300">
+                      <span>Daily Expenses (3%):</span>
+                      <span className="text-rose-400 font-bold">-$4,275</span>
+                    </div>
+                    <div className="flex justify-between text-slate-300">
+                      <span>Tax Reserve (3%):</span>
+                      <span className="text-orange-400 font-bold">-$4,275</span>
                     </div>
                     <div className="pt-2 border-t border-slate-800 flex justify-between font-black text-sm">
-                      <span className="text-amber-400">Net Ring-Fenced Profit (20%):</span>
-                      <span className="text-amber-400">$28,500</span>
+                      <span className="text-emerald-400">Net Ring-Fenced Profit (3%):</span>
+                      <span className="text-emerald-400">$4,275</span>
                     </div>
                   </div>
                 </div>

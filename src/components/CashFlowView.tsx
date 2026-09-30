@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ArrowDownRight,
   PieChart,
@@ -17,6 +17,7 @@ import {
 import { useApp } from '../context/AppContext';
 import {
   ACCOUNTS,
+  INITIAL_PERCENTAGES,
   calculateDistribution,
   formatCurrency,
 } from '../data/constants';
@@ -39,6 +40,11 @@ export const CashFlowView: React.FC = () => {
   const [editingPcts, setEditingPcts] = useState<Record<AccountKey, number>>({
     ...state.percentages,
   });
+
+  useEffect(() => {
+    setEditingPcts({ ...state.percentages });
+  }, [state.percentages]);
+
   const [isEditingPcts, setIsEditingPcts] = useState(false);
   const [selectedAccountFilter, setSelectedAccountFilter] = useState<string>('all');
 
@@ -198,20 +204,28 @@ export const CashFlowView: React.FC = () => {
               ))}
             </div>
 
-            <div className="flex justify-end gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <button
-                onClick={() => setEditingPcts({ ...state.percentages })}
-                className="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-200 transition"
+                onClick={() => setEditingPcts({ ...INITIAL_PERCENTAGES })}
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 transition cursor-pointer"
               >
-                Reset
+                Reset to Default Splits (75% Input, 6% Salaries, 5% Rent, 3% Profit/M/E/T, 2% Cash In)
               </button>
-              <button
-                disabled={!isPctValid}
-                onClick={handleSavePcts}
-                className="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:bg-slate-300 text-white font-bold text-xs transition cursor-pointer"
-              >
-                Save & Apply Rules
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setEditingPcts({ ...state.percentages })}
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-200 transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  disabled={!isPctValid}
+                  onClick={handleSavePcts}
+                  className="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:bg-slate-300 text-white font-bold text-xs transition cursor-pointer shadow-xs"
+                >
+                  Save & Apply Rules
+                </button>
+              </div>
             </div>
           </div>
         )}
