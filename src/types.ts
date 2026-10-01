@@ -173,15 +173,41 @@ export interface AutomationRule {
   runCount: number;
 }
 
+export type UserRole = 'owner' | 'admin';
+
 export interface UserProfile {
-  id?: string;
+  id: string;
   name: string;
   email: string;
   companyName: string;
-  role: string;
+  role: UserRole;
   businessType?: string;
   avatarUrl?: string;
   createdAt: string;
+}
+
+export type ActivityAction =
+  | 'signup'
+  | 'login'
+  | 'logout'
+  | 'cash_in'
+  | 'invoice_created'
+  | 'invoice_paid'
+  | 'deal_won'
+  | 'account_adjusted'
+  | 'role_changed'
+  | 'settings_updated';
+
+export interface SiteActivity {
+  id: string;
+  userId: string;
+  userEmail: string;
+  userName: string;
+  companyName?: string;
+  action: ActivityAction;
+  details: string;
+  amount?: number;
+  timestamp: string;
 }
 
 export interface AppSettings {

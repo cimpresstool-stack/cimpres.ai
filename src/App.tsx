@@ -8,6 +8,7 @@ import { InvoicingView } from './components/InvoicingView';
 import { FinancialReportingView } from './components/FinancialReportingView';
 import { PaymentLinksView } from './components/PaymentLinksView';
 import { SettingsView } from './components/SettingsView';
+import { AdminControlView } from './components/AdminControlView';
 import { LandingPage } from './components/landing/LandingPage';
 
 // Modals
@@ -65,6 +66,7 @@ const AppContent: React.FC = () => {
           {activeTab === 'reports' && <FinancialReportingView />}
           {(activeTab === 'payment-links' || activeTab === 'paylinks') && <PaymentLinksView />}
           {activeTab === 'settings' && <SettingsView />}
+          {activeTab === 'admin' && <AdminControlView />}
         </main>
       </div>
 

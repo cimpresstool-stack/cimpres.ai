@@ -12,6 +12,7 @@ import {
   Globe,
   LogOut,
   User,
+  ShieldCheck,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { formatCompactCurrency } from '../data/constants';
@@ -149,6 +150,19 @@ export const Navbar: React.FC<{ onToggleMobileSidebar?: () => void }> = ({
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             <span>100% Free Plan</span>
           </div>
+
+          {/* Admin Control Center Shortcut for Administrators */}
+          {currentUser?.role === 'admin' && (
+            <button
+              onClick={() => setActiveTab('admin')}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-xs font-bold transition cursor-pointer"
+              title="Access Admin Control Center"
+              id="nav-btn-admin-panel"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-purple-600" />
+              <span className="hidden md:inline">Admin Panel</span>
+            </button>
+          )}
 
           {/* Public Landing Page View Link */}
           <button

@@ -49,6 +49,7 @@ export const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
   } = useApp();
 
   const pendingInvoicesCount = state.invoices.filter((i) => i.status === 'sent').length;
+  const isAdmin = currentUser?.role === 'admin';
 
   const sections: NavSection[] = [
     {
@@ -73,6 +74,22 @@ export const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
         { id: 'paylinks', label: 'Payment Links', icon: Link2 },
       ],
     },
+    ...(isAdmin
+      ? [
+          {
+            title: 'Platform Governance',
+            items: [
+              {
+                id: 'admin',
+                label: 'Admin Control Center',
+                icon: ShieldCheck,
+                badge: 'Super Admin',
+                badgeColor: 'bg-purple-500/25 text-purple-300 border border-purple-500/30',
+              },
+            ],
+          },
+        ]
+      : []),
     {
       title: 'Configuration',
       items: [
@@ -188,14 +205,40 @@ export const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
           {/* User Profile Mini Card */}
           {isAuthenticated ? (
             <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-black text-xs flex items-center justify-center shrink-0">
+              <div
+                onClick={() => {
+                  if (isAdmin) {
+                    setActiveTab('admin');
+                    if (window.innerWidth < 1024) onClose();
+                  }
+                }}
+                className={`flex items-center gap-2.5 min-w-0 ${isAdmin ? 'cursor-pointer hover:opacity-90' : ''}`}
+                title={isAdmin ? 'View Admin Control Center' : 'Active Business Account'}
+              >
+                <div
+                  className={`w-8 h-8 rounded-lg font-black text-xs flex items-center justify-center shrink-0 text-white ${
+                    isAdmin
+                      ? 'bg-gradient-to-tr from-purple-600 to-indigo-600 ring-1 ring-purple-400/30'
+                      : 'bg-gradient-to-tr from-blue-600 to-indigo-600'
+                  }`}
+                >
                   {currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs font-bold text-white truncate">
-                    {currentUser?.name || 'Finance Lead'}
-                  </p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-xs font-bold text-white truncate">
+                      {currentUser?.name || 'Finance Lead'}
+                    </p>
+                    <span
+                      className={`text-[9px] font-bold px-1.5 py-0.2 rounded uppercase tracking-wider shrink-0 ${
+                        isAdmin
+                          ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                          : 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                      }`}
+                    >
+                      {isAdmin ? 'Admin' : 'Owner'}
+                    </span>
+                  </div>
                   <p className="text-[10px] text-slate-400 truncate">
                     {currentUser?.companyName || 'Cimpres Global'}
                   </p>

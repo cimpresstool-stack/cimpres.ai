@@ -14,6 +14,7 @@ import {
   AppSettings,
   Transaction,
   UserProfile,
+  UserRole,
 } from '../types';
 import {
   INITIAL_STATE,
@@ -23,7 +24,14 @@ import {
   calculateDistribution,
   ACCOUNTS,
 } from '../data/constants';
-import { syncStateToSupabase } from '../lib/supabase';
+import {
+  syncStateToSupabase,
+  supabaseAuthSignUp,
+  supabaseAuthSignIn,
+  supabaseAuthSignOut,
+  supabaseAuthGetSession,
+  logSiteActivity,
+} from '../lib/supabase';
 
 const STORAGE_KEY = 'cimpres_crm_cashflow_state_v1';
 const AUTH_STORAGE_KEY = 'cimpres_crm_auth_user_v1';
@@ -45,7 +53,14 @@ interface AppContextType {
   openAuthModal: (mode?: 'login' | 'signup') => void;
   requireAuth: (actionName?: string) => boolean;
   login: (email: string, password?: string) => Promise<void>;
-  signup: (email: string, password: string, name: string, companyName: string, businessType?: string) => Promise<void>;
+  signup: (
+    email: string,
+    password: string,
+    name: string,
+    companyName: string,
+    businessType?: string,
+    role?: UserRole
+  ) => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   quickDemoLogin: () => void;
   logout: () => Promise<void>;
@@ -204,31 +219,40 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [authModalMode, setAuthModalMode] = useState<'login' | 'signup'>('login');
   const [authLoading, setAuthLoading] = useState<boolean>(true);
 
-  // Restore session from local storage on boot
+  // Restore session from Supabase / local storage on boot to stay signed in across page refreshes
   useEffect(() => {
-    try {
-      const savedUser = localStorage.getItem(AUTH_STORAGE_KEY);
-      if (savedUser) {
-        const user: UserProfile = JSON.parse(savedUser);
-        setCurrentUser(user);
-        const userSaved = localStorage.getItem(`cimpres_state_user_${user.id}`);
-        if (userSaved) {
-          const parsed = JSON.parse(userSaved);
-          setState({
-            ...parsed,
-            balances: { ...ZERO_BALANCES, ...(parsed.balances || {}) },
-            percentages: resolveInitialPercentages(parsed.percentages),
-          });
+    let isMounted = true;
+    async function restoreSession() {
+      try {
+        const sessionUser = await supabaseAuthGetSession();
+        if (!isMounted) return;
+        if (sessionUser) {
+          setCurrentUser(sessionUser);
+          localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(sessionUser));
+          const userSaved = localStorage.getItem(`cimpres_state_user_${sessionUser.id}`);
+          if (userSaved) {
+            const parsed = JSON.parse(userSaved);
+            setState({
+              ...parsed,
+              balances: { ...ZERO_BALANCES, ...(parsed.balances || {}) },
+              percentages: resolveInitialPercentages(parsed.percentages),
+            });
+          }
+          setIsLandingPageActive(false);
+        } else {
+          setCurrentUser(null);
         }
-      } else {
-        setCurrentUser(null);
+      } catch (e) {
+        console.warn('Session restore notice:', e);
+        if (isMounted) setCurrentUser(null);
+      } finally {
+        if (isMounted) setAuthLoading(false);
       }
-    } catch (e) {
-      console.warn('Session restore notice:', e);
-      setCurrentUser(null);
-    } finally {
-      setAuthLoading(false);
     }
+    restoreSession();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // Guarantee active workspace adopts the new default percentages (Cash In 2%, Input 75%, Marketing 3%, Profit 3%, Rent 5%, Expenses 3%, Salaries 6%, Taxes 3%)
@@ -342,6 +366,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         colors: ['#10b981', '#2563eb', '#f59e0b', '#06b6d4'],
       });
     } catch {}
+
+    logSiteActivity({
+      userId: currentUser?.id || 'usr',
+      userEmail: currentUser?.email || 'owner@example.com',
+      userName: currentUser?.name || 'Business Owner',
+      companyName: currentUser?.companyName || state.settings.businessName,
+      action: 'cash_in',
+      amount: num,
+      details: `Cash In recorded: $${num.toLocaleString()} distributed across 8 accounts (${note || 'Operating revenue'})`,
+    }).catch(() => {});
 
     showToast(`Distributed ${state.settings.currency}${num.toLocaleString()} across 8 accounts`);
     return newTx;
@@ -641,6 +675,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       recordCashIn(newInvoice.total, `Invoice Payment: ${invNum} (${newInvoice.contactName})`);
     }
 
+    logSiteActivity({
+      userId: currentUser?.id || 'usr',
+      userEmail: currentUser?.email || 'owner@example.com',
+      userName: currentUser?.name || 'Business Owner',
+      companyName: currentUser?.companyName || state.settings.businessName,
+      action: 'invoice_created',
+      amount: newInvoice.total,
+      details: `Generated Invoice #${invNum} for ${newInvoice.contactName} ($${newInvoice.total.toLocaleString()})`,
+    }).catch(() => {});
+
     showToast(`Invoice ${invNum} created successfully`);
     return newInvoice;
   };
@@ -690,6 +734,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (invoiceToFund) {
       const inv = invoiceToFund as Invoice;
       recordCashIn(inv.total, `Automated Invoice Settlement: ${inv.invoiceNum} (${inv.contactName})`);
+      logSiteActivity({
+        userId: currentUser?.id || 'usr',
+        userEmail: currentUser?.email || 'owner@example.com',
+        userName: currentUser?.name || 'Business Owner',
+        companyName: currentUser?.companyName || state.settings.businessName,
+        action: 'invoice_paid',
+        amount: inv.total,
+        details: `Invoice #${inv.invoiceNum} marked PAID for ${inv.contactName}`,
+      }).catch(() => {});
       showToast(`Invoice ${inv.invoiceNum} marked PAID and routed into 8 accounts!`);
     } else {
       showToast(`Invoice updated to ${status}`);
@@ -1000,57 +1053,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     try {
-      const savedCredStr = localStorage.getItem(`cimpres_cred_${cleanEmail.toLowerCase()}`);
-      if (savedCredStr) {
-        const savedCred = JSON.parse(savedCredStr);
-        if (savedCred.password && savedCred.password !== password) {
-          throw new Error('Invalid email or password. Please verify your credentials.');
-        }
-        const profile: UserProfile = savedCred.profile || {
-          id: `usr_${Date.now()}`,
-          name: cleanEmail.split('@')[0],
-          email: cleanEmail,
-          companyName: 'My Enterprise',
-          role: 'Executive Administrator',
-          createdAt: new Date().toISOString(),
-        };
-        setCurrentUser(profile);
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(profile));
+      const authRes = await supabaseAuthSignIn({ email: cleanEmail, password });
+      const profile = authRes.user;
 
-        const savedState = localStorage.getItem(`cimpres_state_user_${profile.id}`);
-        if (savedState) {
-          try {
-            setState(JSON.parse(savedState));
-          } catch (e) {}
-        }
-        setIsAuthModalOpen(false);
-        setIsLandingPageActive(false);
-        showToast(`Welcome back, ${profile.name}!`);
-        return;
+      setCurrentUser(profile);
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(profile));
+
+      const savedState = localStorage.getItem(`cimpres_state_user_${profile.id}`);
+      if (savedState) {
+        try {
+          setState(JSON.parse(savedState));
+        } catch (e) {}
+      } else {
+        const cleanState = createCleanBusinessState(profile.companyName, profile.email);
+        setState(cleanState);
+        try {
+          localStorage.setItem(`cimpres_state_user_${profile.id}`, JSON.stringify(cleanState));
+        } catch (e) {}
       }
 
-      // If logging in for the first time with this email, create a new workspace session
-      const newProfile: UserProfile = {
-        id: `usr_${Date.now()}`,
-        name: cleanEmail.split('@')[0],
-        email: cleanEmail,
-        companyName: 'My Enterprise',
-        role: 'Executive Administrator',
-        createdAt: new Date().toISOString(),
-      };
-      const cleanState = createCleanBusinessState(newProfile.companyName, cleanEmail);
-      setState(cleanState);
-      localStorage.setItem(
-        `cimpres_cred_${cleanEmail.toLowerCase()}`,
-        JSON.stringify({ email: cleanEmail, password, profile: newProfile })
-      );
-      localStorage.setItem(`cimpres_state_user_${newProfile.id}`, JSON.stringify(cleanState));
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newProfile));
-
-      setCurrentUser(newProfile);
       setIsAuthModalOpen(false);
       setIsLandingPageActive(false);
-      showToast(`Welcome, ${newProfile.name}!`);
+      showToast(`Welcome back, ${profile.name}! (${profile.role === 'admin' ? 'Administrator' : 'Business Owner'})`);
     } finally {
       setAuthLoading(false);
     }
@@ -1061,7 +1085,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     password: string,
     name: string,
     companyName: string,
-    businessType?: string
+    businessType?: string,
+    role?: UserRole
   ) => {
     setAuthLoading(true);
     const cleanEmail = email.trim();
@@ -1086,32 +1111,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     try {
-      const localId = `usr_${Date.now()}`;
-      const profile: UserProfile = {
-        id: localId,
-        name: cleanName,
+      const authRes = await supabaseAuthSignUp({
         email: cleanEmail,
+        password,
+        name: cleanName,
         companyName: cleanCompany,
-        role: 'Owner & Managing Director',
         businessType: businessType || 'agency',
-        createdAt: new Date().toISOString(),
-      };
+        role: role || (cleanEmail === 'cimpresstool@gmail.com' ? 'admin' : 'owner'),
+      });
 
+      const profile = authRes.user;
       const cleanState = createCleanBusinessState(cleanCompany, cleanEmail);
       setState(cleanState);
 
-      localStorage.setItem(
-        `cimpres_cred_${cleanEmail.toLowerCase()}`,
-        JSON.stringify({ email: cleanEmail, password, profile })
-      );
-      localStorage.setItem(`cimpres_state_user_${localId}`, JSON.stringify(cleanState));
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(profile));
+      try {
+        localStorage.setItem(`cimpres_state_user_${profile.id}`, JSON.stringify(cleanState));
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(profile));
+      } catch (e) {}
 
       setCurrentUser(profile);
       setIsAuthModalOpen(false);
       setIsLandingPageActive(false);
       confetti({ particleCount: 90, spread: 75, origin: { y: 0.6 } });
-      showToast(`Welcome ${cleanName}! Your workspace is active and ready.`);
+      showToast(`Welcome ${cleanName}! Registered as ${profile.role === 'admin' ? 'Administrator' : 'Business Owner'}.`);
     } finally {
       setAuthLoading(false);
     }
@@ -1129,20 +1151,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       name: 'Alex Vance (Test Drive)',
       email: 'cimpresstool@gmail.com',
       companyName: 'Cimpres Global Group',
-      role: 'Executive Administrator',
+      role: 'admin',
       createdAt: new Date().toISOString(),
     };
     setCurrentUser(demoUser);
     localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(demoUser));
     setIsAuthModalOpen(false);
     setIsLandingPageActive(false);
-    showToast('Instant Demo session started! All features available.');
+    logSiteActivity({
+      userId: demoUser.id,
+      userEmail: demoUser.email,
+      userName: demoUser.name,
+      companyName: demoUser.companyName,
+      action: 'login',
+      details: 'Started Instant Demo session (Administrator Access)',
+    }).catch(() => {});
+    showToast('Instant Demo session started! Administrator privileges active.');
   };
 
   const logout = async () => {
+    const prevUser = currentUser;
     setCurrentUser(null);
     try {
       localStorage.removeItem(AUTH_STORAGE_KEY);
+      await supabaseAuthSignOut(prevUser);
     } catch (e) {
       console.warn('Storage clear notice:', e);
     }

@@ -13,6 +13,7 @@ import {
   KeyRound,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { UserRole } from '../../types';
 
 export const AuthModal: React.FC = () => {
   const {
@@ -31,6 +32,7 @@ export const AuthModal: React.FC = () => {
   const [name, setName] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [businessType, setBusinessType] = useState('agency');
+  const [role, setRole] = useState<UserRole>('owner');
   const [rememberMe, setRememberMe] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -85,7 +87,7 @@ export const AuthModal: React.FC = () => {
     setSuccessMsg('');
     setIsSubmitting(true);
     try {
-      await signup(email, password, name, companyName, businessType);
+      await signup(email, password, name, companyName, businessType, role);
     } catch (err: any) {
       setErrorMsg(err.message || 'Registration failed. Please check your details.');
     } finally {
@@ -395,6 +397,47 @@ export const AuthModal: React.FC = () => {
                   <option value="services">Field & Commercial Services</option>
                   <option value="freelance">Independent Consultancy / Studio</option>
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                  Account Type & Access Role
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setRole('owner')}
+                    className={`p-3 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between ${
+                      role === 'owner'
+                        ? 'border-blue-600 bg-blue-50/70 text-blue-900 ring-2 ring-blue-500/20'
+                        : 'border-slate-200 hover:border-slate-300 text-slate-700'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <Building2 className={`w-4 h-4 ${role === 'owner' ? 'text-blue-600' : 'text-slate-400'}`} />
+                      {role === 'owner' && <span className="w-2 h-2 rounded-full bg-blue-600" />}
+                    </div>
+                    <span className="text-xs font-bold block">Business Owner</span>
+                    <span className="text-[10px] text-slate-500 leading-tight mt-0.5">8 Accounts, CRM & Invoicing</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setRole('admin')}
+                    className={`p-3 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between ${
+                      role === 'admin'
+                        ? 'border-purple-600 bg-purple-50/70 text-purple-900 ring-2 ring-purple-500/20'
+                        : 'border-slate-200 hover:border-slate-300 text-slate-700'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <ShieldCheck className={`w-4 h-4 ${role === 'admin' ? 'text-purple-600' : 'text-slate-400'}`} />
+                      {role === 'admin' && <span className="w-2 h-2 rounded-full bg-purple-600" />}
+                    </div>
+                    <span className="text-xs font-bold block">Administrator</span>
+                    <span className="text-[10px] text-slate-500 leading-tight mt-0.5">Full Site Governance & Audit</span>
+                  </button>
+                </div>
               </div>
 
               <div>
