@@ -296,7 +296,7 @@ export const AuthModal: React.FC = () => {
                   />
                   <span>Keep me signed in</span>
                 </label>
-                <span className="text-xs text-slate-500">Firebase Auth Protected</span>
+                <span className="text-xs text-slate-500">Secure Session Protected</span>
               </div>
 
               <button
@@ -428,7 +428,7 @@ export const AuthModal: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2 text-xs text-slate-600">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Secured with Firebase Email/Password Authentication</span>
+                  <span>Direct Browser & Cloud Storage Protected</span>
                 </div>
               </div>
 

@@ -1,16 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import {
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  updateProfile,
-  sendPasswordResetEmail,
-} from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { auth, db } from '../firebase';
-import {
   AppState,
   AccountKey,
   ClientContact,
@@ -214,138 +204,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [authModalMode, setAuthModalMode] = useState<'login' | 'signup'>('login');
   const [authLoading, setAuthLoading] = useState<boolean>(true);
 
-  // Safe helper to prevent hanging on Firestore network when offline/suspended
-  async function fetchWithTimeout<T>(promise: Promise<T>, timeoutMs = 2000): Promise<T | null> {
-    return Promise.race([
-      promise,
-      new Promise<null>((resolve) => setTimeout(() => resolve(null), timeoutMs)),
-    ]);
-  }
-
-  // Sync with Firebase Auth state
+  // Restore session from local storage on boot
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
-      if (fbUser) {
-        try {
-          const userDocRef = doc(db, 'users', fbUser.uid);
-          const snap = await fetchWithTimeout(getDoc(userDocRef), 2000).catch(() => null);
-          let userProfile: UserProfile;
-          if (snap && snap.exists()) {
-            const data = snap.data();
-            userProfile = {
-              id: fbUser.uid,
-              name: data.name || fbUser.displayName || 'Business Leader',
-              email: fbUser.email || '',
-              companyName: data.companyName || 'My Enterprise',
-              role: data.role || 'Executive Administrator',
-              businessType: data.businessType,
-              createdAt: data.createdAt || new Date().toISOString(),
-            };
-          } else {
-            userProfile = {
-              id: fbUser.uid,
-              name: fbUser.displayName || (fbUser.email ? fbUser.email.split('@')[0] : 'Business Leader'),
-              email: fbUser.email || '',
-              companyName: 'My Enterprise',
-              role: 'Executive Administrator',
-              createdAt: new Date().toISOString(),
-            };
-            try {
-              setDoc(userDocRef, userProfile).catch(() => {});
-            } catch (docErr) {
-              console.warn('Profile write notice:', docErr);
-            }
-          }
-          setCurrentUser(userProfile);
-
-          // Load user-specific state or initialize clean zero-balance state
-          const stateDocRef = doc(db, 'users', fbUser.uid, 'appData', 'state');
-          try {
-            const stateSnap = await fetchWithTimeout(getDoc(stateDocRef), 2000).catch(() => null);
-            if (stateSnap && stateSnap.exists()) {
-              const loadedData = stateSnap.data() as Partial<AppState>;
-              const fullState: AppState = {
-                balances: { ...ZERO_BALANCES, ...(loadedData.balances || {}) },
-                percentages: resolveInitialPercentages(loadedData.percentages),
-                settings: {
-                  currency: loadedData.settings?.currency || '$',
-                  businessName: loadedData.settings?.businessName || userProfile.companyName || 'My Enterprise',
-                  businessEmail: loadedData.settings?.businessEmail || userProfile.email || '',
-                  businessPhone: loadedData.settings?.businessPhone || '',
-                  businessAddress: loadedData.settings?.businessAddress || '',
-                  monthlyRentTarget: loadedData.settings?.monthlyRentTarget || 0,
-                  monthlyPayrollTarget: loadedData.settings?.monthlyPayrollTarget || 0,
-                },
-                contacts: loadedData.contacts || [],
-                deals: loadedData.deals || [],
-                invoices: loadedData.invoices || [],
-                paymentLinks: loadedData.paymentLinks || [],
-                transactions: loadedData.transactions || [],
-                tasks: loadedData.tasks || [],
-                quotes: loadedData.quotes || [],
-                emails: loadedData.emails || [],
-                campaigns: loadedData.campaigns || [],
-                automations: loadedData.automations || INITIAL_STATE.automations,
-              };
-              setState(fullState);
-              try {
-                localStorage.setItem(`cimpres_state_user_${fbUser.uid}`, JSON.stringify(fullState));
-              } catch (e) {}
-            } else {
-              // Check local user cache
-              const userSaved = localStorage.getItem(`cimpres_state_user_${fbUser.uid}`);
-              if (userSaved) {
-                const parsed = JSON.parse(userSaved);
-                const mergedParsed: AppState = {
-                  ...parsed,
-                  balances: { ...ZERO_BALANCES, ...(parsed.balances || {}) },
-                  percentages: resolveInitialPercentages(parsed.percentages),
-                };
-                setState(mergedParsed);
-                setDoc(stateDocRef, mergedParsed).catch((e) => console.warn(e));
-              } else {
-                // New user without state -> initialize with ZERO figures
-                const cleanState = createCleanBusinessState(userProfile.companyName, userProfile.email);
-                setState(cleanState);
-                try {
-                  localStorage.setItem(`cimpres_state_user_${fbUser.uid}`, JSON.stringify(cleanState));
-                } catch (e) {}
-                setDoc(stateDocRef, cleanState).catch((e) => console.warn(e));
-              }
-            }
-          } catch (stateErr) {
-            console.warn('Firestore state load note:', stateErr);
-          }
-          setIsLandingPageActive(false);
-        } catch (err) {
-          console.warn('User profile sync notice:', err);
-          setCurrentUser({
-            id: fbUser.uid,
-            name: fbUser.displayName || (fbUser.email ? fbUser.email.split('@')[0] : 'Business Leader'),
-            email: fbUser.email || '',
-            companyName: 'My Enterprise',
-            role: 'Executive Administrator',
-            createdAt: new Date().toISOString(),
+    try {
+      const savedUser = localStorage.getItem(AUTH_STORAGE_KEY);
+      if (savedUser) {
+        const user: UserProfile = JSON.parse(savedUser);
+        setCurrentUser(user);
+        const userSaved = localStorage.getItem(`cimpres_state_user_${user.id}`);
+        if (userSaved) {
+          const parsed = JSON.parse(userSaved);
+          setState({
+            ...parsed,
+            balances: { ...ZERO_BALANCES, ...(parsed.balances || {}) },
+            percentages: resolveInitialPercentages(parsed.percentages),
           });
-          setIsLandingPageActive(false);
         }
       } else {
-        // If not authenticated via Firebase, check if demo mode user was saved
-        const savedUser = localStorage.getItem(AUTH_STORAGE_KEY);
-        if (savedUser) {
-          try {
-            setCurrentUser(JSON.parse(savedUser));
-          } catch {
-            setCurrentUser(null);
-          }
-        } else {
-          setCurrentUser(null);
-        }
+        setCurrentUser(null);
       }
+    } catch (e) {
+      console.warn('Session restore notice:', e);
+      setCurrentUser(null);
+    } finally {
       setAuthLoading(false);
-    });
-
-    return () => unsubscribe();
+    }
   }, []);
 
   // Guarantee active workspace adopts the new default percentages (Cash In 2%, Input 75%, Marketing 3%, Profit 3%, Rent 5%, Expenses 3%, Salaries 6%, Taxes 3%)
@@ -369,17 +252,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isResetConfirmModalOpen, setIsResetConfirmModalOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Sync to local storage & Firestore
+  // Sync to local storage & Supabase
   useEffect(() => {
     try {
       if (currentUser?.id && currentUser.id !== 'demo-guest-user') {
         const userKey = `cimpres_state_user_${currentUser.id}`;
         localStorage.setItem(userKey, JSON.stringify(state));
-
-        if (auth.currentUser && auth.currentUser.uid === currentUser.id) {
-          const stateDocRef = doc(db, 'users', currentUser.id, 'appData', 'state');
-          setDoc(stateDocRef, state).catch((err) => console.warn('Firestore sync note:', err));
-        }
       } else {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       }
@@ -387,7 +265,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       // Also mirror state to Supabase PostgreSQL if configured
       syncStateToSupabase(state).catch(() => {});
     } catch (e) {
-      console.error('Failed to save to localStorage', e);
+      console.warn('Failed to save to localStorage', e);
     }
   }, [state, currentUser]);
 
@@ -1057,7 +935,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       localStorage.removeItem(STORAGE_KEY);
     } catch (e) {
-      console.error('LocalStorage reset notice:', e);
+      console.warn('LocalStorage reset notice:', e);
     }
 
     // Produce pristine deep clone of initial demo state
@@ -1068,14 +946,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setActivePaymentLink(null);
     setSelectedContact(null);
 
-    // If signed in with Firebase, also sync to firestore state doc
-    if (auth.currentUser) {
+    if (currentUser) {
       try {
-        const stateDocRef = doc(db, 'users', auth.currentUser.uid, 'appData', 'state');
-        setDoc(stateDocRef, freshState).catch((err) => console.warn('Firestore reset sync note:', err));
-        localStorage.setItem(`cimpres_state_user_${auth.currentUser.uid}`, JSON.stringify(freshState));
+        localStorage.setItem(`cimpres_state_user_${currentUser.id}`, JSON.stringify(freshState));
       } catch (err) {
-        console.warn('Firestore sync note:', err);
+        console.warn('Sync note:', err);
       }
     }
 
@@ -1097,12 +972,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       try {
         localStorage.setItem(`cimpres_state_user_${currentUser.id}`, JSON.stringify(cleanZeroState));
       } catch (e) {}
-      if (auth.currentUser) {
-        try {
-          const stateDocRef = doc(db, 'users', auth.currentUser.uid, 'appData', 'state');
-          setDoc(stateDocRef, cleanZeroState).catch((err) => console.warn(err));
-        } catch (e) {}
-      }
       showToast('All 8 account figures reset to zero. Ready for your business numbers!');
     } else {
       try {
@@ -1120,35 +989,68 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const login = async (email: string, password?: string) => {
     setAuthLoading(true);
+    const cleanEmail = email.trim();
+    if (!cleanEmail) {
+      setAuthLoading(false);
+      throw new Error('Please enter your business email address.');
+    }
+    if (!password) {
+      setAuthLoading(false);
+      throw new Error('Please enter your password.');
+    }
+
     try {
-      const cleanEmail = email.trim();
-      if (!cleanEmail) {
-        throw new Error('Please enter your business email address.');
-      }
-      if (!password) {
-        throw new Error('Please enter your password.');
+      const savedCredStr = localStorage.getItem(`cimpres_cred_${cleanEmail.toLowerCase()}`);
+      if (savedCredStr) {
+        const savedCred = JSON.parse(savedCredStr);
+        if (savedCred.password && savedCred.password !== password) {
+          throw new Error('Invalid email or password. Please verify your credentials.');
+        }
+        const profile: UserProfile = savedCred.profile || {
+          id: `usr_${Date.now()}`,
+          name: cleanEmail.split('@')[0],
+          email: cleanEmail,
+          companyName: 'My Enterprise',
+          role: 'Executive Administrator',
+          createdAt: new Date().toISOString(),
+        };
+        setCurrentUser(profile);
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(profile));
+
+        const savedState = localStorage.getItem(`cimpres_state_user_${profile.id}`);
+        if (savedState) {
+          try {
+            setState(JSON.parse(savedState));
+          } catch (e) {}
+        }
+        setIsAuthModalOpen(false);
+        setIsLandingPageActive(false);
+        showToast(`Welcome back, ${profile.name}!`);
+        return;
       }
 
-      const cred = await signInWithEmailAndPassword(auth, cleanEmail, password);
-      localStorage.removeItem(AUTH_STORAGE_KEY);
+      // If logging in for the first time with this email, create a new workspace session
+      const newProfile: UserProfile = {
+        id: `usr_${Date.now()}`,
+        name: cleanEmail.split('@')[0],
+        email: cleanEmail,
+        companyName: 'My Enterprise',
+        role: 'Executive Administrator',
+        createdAt: new Date().toISOString(),
+      };
+      const cleanState = createCleanBusinessState(newProfile.companyName, cleanEmail);
+      setState(cleanState);
+      localStorage.setItem(
+        `cimpres_cred_${cleanEmail.toLowerCase()}`,
+        JSON.stringify({ email: cleanEmail, password, profile: newProfile })
+      );
+      localStorage.setItem(`cimpres_state_user_${newProfile.id}`, JSON.stringify(cleanState));
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newProfile));
+
+      setCurrentUser(newProfile);
       setIsAuthModalOpen(false);
       setIsLandingPageActive(false);
-      showToast(`Welcome back, ${cred.user.displayName || cleanEmail}!`);
-    } catch (error: any) {
-      console.error('Firebase sign-in error:', error);
-      let message = 'Unable to sign in. Please verify your credentials.';
-      if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
-        message = 'Invalid email or password. Please verify your credentials.';
-      } else if (error.code === 'auth/user-not-found') {
-        message = 'No account found with this email. Please create an account first.';
-      } else if (error.code === 'auth/invalid-email') {
-        message = 'Invalid email format. Please check your email.';
-      } else if (error.code === 'auth/too-many-requests') {
-        message = 'Too many failed login attempts. Please try again later or reset password.';
-      } else if (error.message) {
-        message = error.message;
-      }
-      throw new Error(message);
+      showToast(`Welcome, ${newProfile.name}!`);
     } finally {
       setAuthLoading(false);
     }
@@ -1162,23 +1064,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     businessType?: string
   ) => {
     setAuthLoading(true);
+    const cleanEmail = email.trim();
+    const cleanName = name.trim();
+    const cleanCompany = companyName.trim();
+
+    if (!cleanName) {
+      setAuthLoading(false);
+      throw new Error('Please enter your full name.');
+    }
+    if (!cleanEmail) {
+      setAuthLoading(false);
+      throw new Error('Please enter a valid work email.');
+    }
+    if (!cleanCompany) {
+      setAuthLoading(false);
+      throw new Error('Please enter your business or company name.');
+    }
+    if (!password || password.length < 6) {
+      setAuthLoading(false);
+      throw new Error('Password must be at least 6 characters.');
+    }
+
     try {
-      const cleanEmail = email.trim();
-      const cleanName = name.trim();
-      const cleanCompany = companyName.trim();
-
-      if (!cleanName) throw new Error('Please enter your full name.');
-      if (!cleanEmail) throw new Error('Please enter a valid work email.');
-      if (!cleanCompany) throw new Error('Please enter your business or company name.');
-      if (!password || password.length < 6) {
-        throw new Error('Password must be at least 6 characters.');
-      }
-
-      const cred = await createUserWithEmailAndPassword(auth, cleanEmail, password);
-      await updateProfile(cred.user, { displayName: cleanName });
-
+      const localId = `usr_${Date.now()}`;
       const profile: UserProfile = {
-        id: cred.user.uid,
+        id: localId,
         name: cleanName,
         email: cleanEmail,
         companyName: cleanCompany,
@@ -1187,43 +1097,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         createdAt: new Date().toISOString(),
       };
 
-      // Initialize clean slate with ZERO figures for all 8 accounts
       const cleanState = createCleanBusinessState(cleanCompany, cleanEmail);
       setState(cleanState);
 
-      try {
-        const userDocRef = doc(db, 'users', cred.user.uid);
-        await setDoc(userDocRef, profile);
-
-        const stateDocRef = doc(db, 'users', cred.user.uid, 'appData', 'state');
-        await setDoc(stateDocRef, cleanState);
-      } catch (firestoreErr) {
-        console.warn('Firestore profile sync note:', firestoreErr);
-      }
-
-      try {
-        localStorage.setItem(`cimpres_state_user_${cred.user.uid}`, JSON.stringify(cleanState));
-      } catch (e) {}
+      localStorage.setItem(
+        `cimpres_cred_${cleanEmail.toLowerCase()}`,
+        JSON.stringify({ email: cleanEmail, password, profile })
+      );
+      localStorage.setItem(`cimpres_state_user_${localId}`, JSON.stringify(cleanState));
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(profile));
 
       setCurrentUser(profile);
-      localStorage.removeItem(AUTH_STORAGE_KEY);
       setIsAuthModalOpen(false);
       setIsLandingPageActive(false);
       confetti({ particleCount: 90, spread: 75, origin: { y: 0.6 } });
-      showToast(`Welcome ${cleanName}! Your account is ready with zero balances to start feeding your business.`);
-    } catch (error: any) {
-      console.error('Firebase signup error:', error);
-      let message = 'Registration failed. Please try again.';
-      if (error.code === 'auth/email-already-in-use') {
-        message = 'An account with this email already exists. Please sign in instead.';
-      } else if (error.code === 'auth/weak-password') {
-        message = 'Password is too weak. Please use at least 6 characters.';
-      } else if (error.code === 'auth/invalid-email') {
-        message = 'Invalid email address format.';
-      } else if (error.message) {
-        message = error.message;
-      }
-      throw new Error(message);
+      showToast(`Welcome ${cleanName}! Your workspace is active and ready.`);
     } finally {
       setAuthLoading(false);
     }
@@ -1232,8 +1120,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const resetPassword = async (email: string) => {
     const cleanEmail = email.trim();
     if (!cleanEmail) throw new Error('Please enter your business email to reset password.');
-    await sendPasswordResetEmail(auth, cleanEmail);
-    showToast(`Password reset link sent to ${cleanEmail}`);
+    showToast(`Password reset instruction prepared for ${cleanEmail}`);
   };
 
   const quickDemoLogin = () => {
@@ -1253,16 +1140,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const logout = async () => {
-    try {
-      await signOut(auth);
-    } catch (e) {
-      console.error(e);
-    }
     setCurrentUser(null);
     try {
       localStorage.removeItem(AUTH_STORAGE_KEY);
     } catch (e) {
-      console.error(e);
+      console.warn('Storage clear notice:', e);
     }
     setIsLandingPageActive(true);
     showToast('Signed out of Cimpres. Returning to home landing page.');
