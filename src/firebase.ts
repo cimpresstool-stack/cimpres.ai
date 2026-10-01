@@ -1,23 +1,20 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { initializeFirestore, doc, getDocFromServer } from 'firebase/firestore';
+import { getFirestore, setLogLevel, doc, getDocFromServer } from 'firebase/firestore';
 import firebaseConfig from '../firebase-applet-config.json';
+
+// Silence internal Firestore network connection fallback warnings (e.g. backend offline/suspended)
+setLogLevel('silent');
 
 const app = initializeApp(firebaseConfig);
 
-// Initialize Firestore with specific databaseId and long-polling for robust connectivity in proxies/iframes
-export const db = initializeFirestore(
-  app,
-  {
-    experimentalForceLongPolling: true,
-  },
-  firebaseConfig.firestoreDatabaseId
-);
+// Initialize Firestore with specific databaseId as specified by the Firebase skill
+export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 
 // Initialize Auth
 export const auth = getAuth(app);
 
-// Test Firestore connection on boot
+// Test Firestore connection on boot safely without throwing unhandled exceptions
 export async function testConnection() {
   try {
     await getDocFromServer(doc(db, 'test', 'connection'));
@@ -32,14 +29,13 @@ export async function testConnection() {
         err.message.includes('backend')
       ))
     ) {
-      console.info('Firestore initialized in robust offline-tolerant mode.');
-    } else {
-      console.warn('Firestore connection notice:', error);
+      // Graceful fallback to offline client persistence
+      return;
     }
   }
 }
 
-// Call connection check
+// Non-blocking connection test
 testConnection().catch(() => {});
 
 export enum OperationType {

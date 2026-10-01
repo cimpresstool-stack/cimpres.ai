@@ -33,6 +33,7 @@ import {
   calculateDistribution,
   ACCOUNTS,
 } from '../data/constants';
+import { syncStateToSupabase } from '../lib/supabase';
 
 const STORAGE_KEY = 'cimpres_crm_cashflow_state_v1';
 const AUTH_STORAGE_KEY = 'cimpres_crm_auth_user_v1';
@@ -213,15 +214,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [authModalMode, setAuthModalMode] = useState<'login' | 'signup'>('login');
   const [authLoading, setAuthLoading] = useState<boolean>(true);
 
+  // Safe helper to prevent hanging on Firestore network when offline/suspended
+  async function fetchWithTimeout<T>(promise: Promise<T>, timeoutMs = 2000): Promise<T | null> {
+    return Promise.race([
+      promise,
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), timeoutMs)),
+    ]);
+  }
+
   // Sync with Firebase Auth state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
       if (fbUser) {
         try {
           const userDocRef = doc(db, 'users', fbUser.uid);
-          const snap = await getDoc(userDocRef);
+          const snap = await fetchWithTimeout(getDoc(userDocRef), 2000).catch(() => null);
           let userProfile: UserProfile;
-          if (snap.exists()) {
+          if (snap && snap.exists()) {
             const data = snap.data();
             userProfile = {
               id: fbUser.uid,
@@ -242,7 +251,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               createdAt: new Date().toISOString(),
             };
             try {
-              await setDoc(userDocRef, userProfile);
+              setDoc(userDocRef, userProfile).catch(() => {});
             } catch (docErr) {
               console.warn('Profile write notice:', docErr);
             }
@@ -252,8 +261,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           // Load user-specific state or initialize clean zero-balance state
           const stateDocRef = doc(db, 'users', fbUser.uid, 'appData', 'state');
           try {
-            const stateSnap = await getDoc(stateDocRef);
-            if (stateSnap.exists()) {
+            const stateSnap = await fetchWithTimeout(getDoc(stateDocRef), 2000).catch(() => null);
+            if (stateSnap && stateSnap.exists()) {
               const loadedData = stateSnap.data() as Partial<AppState>;
               const fullState: AppState = {
                 balances: { ...ZERO_BALANCES, ...(loadedData.balances || {}) },
@@ -309,7 +318,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           }
           setIsLandingPageActive(false);
         } catch (err) {
-          console.error('Error fetching user profile from Firestore:', err);
+          console.warn('User profile sync notice:', err);
           setCurrentUser({
             id: fbUser.uid,
             name: fbUser.displayName || (fbUser.email ? fbUser.email.split('@')[0] : 'Business Leader'),
@@ -374,6 +383,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       } else {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       }
+
+      // Also mirror state to Supabase PostgreSQL if configured
+      syncStateToSupabase(state).catch(() => {});
     } catch (e) {
       console.error('Failed to save to localStorage', e);
     }
