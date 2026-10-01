@@ -12,7 +12,6 @@ import {
 import { useApp } from '../context/AppContext';
 import { ACCOUNTS, INITIAL_PERCENTAGES } from '../data/constants';
 import { AccountKey } from '../types';
-import { SupabaseSyncCard } from './SupabaseSyncCard';
 
 export const SettingsView: React.FC = () => {
   const {
@@ -317,9 +316,6 @@ export const SettingsView: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Supabase Cloud Database & Storage Integration */}
-      <SupabaseSyncCard />
     </div>
   );
 };

@@ -12,7 +12,6 @@ import {
   Globe,
   LogOut,
   User,
-  Database,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { formatCompactCurrency } from '../data/constants';
@@ -143,17 +142,6 @@ export const Navbar: React.FC<{ onToggleMobileSidebar?: () => void }> = ({
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline">New Invoice</span>
             <span className="sm:hidden">Invoice</span>
-          </button>
-
-          {/* Supabase Cloud Status */}
-          <button
-            onClick={() => setActiveTab('settings')}
-            className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200 transition cursor-pointer"
-            title="Configure Supabase Cloud Database"
-          >
-            <Database className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Supabase</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
           </button>
 
           {/* 100% Free Plan Status Badge */}
