@@ -7,9 +7,9 @@ import { InvoiceItem } from '../../types';
 export const NewInvoiceModal: React.FC = () => {
   const { state, isNewInvoiceModalOpen, setIsNewInvoiceModalOpen, createInvoice, setPreviewInvoice } = useApp();
 
-  const [contactId, setContactId] = useState<string>(state.contacts[0]?.id || '');
-  const [contactName, setContactName] = useState<string>(state.contacts[0]?.name || '');
-  const [contactEmail, setContactEmail] = useState<string>(state.contacts[0]?.email || '');
+  const [contactId, setContactId] = useState<string>('');
+  const [contactName, setContactName] = useState<string>('');
+  const [contactEmail, setContactEmail] = useState<string>('');
   const [dueDate, setDueDate] = useState<string>(
     new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0]
   );
@@ -21,15 +21,6 @@ export const NewInvoiceModal: React.FC = () => {
   ]);
 
   if (!isNewInvoiceModalOpen) return null;
-
-  const handleClientSelect = (id: string) => {
-    setContactId(id);
-    const found = state.contacts.find((c) => c.id === id);
-    if (found) {
-      setContactName(found.name);
-      setContactEmail(found.email);
-    }
-  };
 
   const handleAddItem = () => {
     setItems([...items, { description: '', quantity: 1, unitPrice: 1000, amount: 1000 }]);
@@ -53,7 +44,21 @@ export const NewInvoiceModal: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!contactName.trim() || total <= 0) return;
+    const cleanName = contactName.trim();
+    if (!cleanName || total <= 0) return;
+
+    // Check if the typed client name matches an existing contact in CRM
+    const matchedContact = state.contacts.find(
+      (c) =>
+        c.name.toLowerCase() === cleanName.toLowerCase() ||
+        c.company.toLowerCase() === cleanName.toLowerCase()
+    );
+
+    const finalContactId = contactId || matchedContact?.id || '';
+    const finalEmail =
+      contactEmail.trim() ||
+      matchedContact?.email ||
+      `${cleanName.toLowerCase().replace(/[^a-z0-9]/g, '') || 'client'}@example.com`;
 
     const formattedItems: InvoiceItem[] = items.map((it, idx) => ({
       ...it,
@@ -62,9 +67,9 @@ export const NewInvoiceModal: React.FC = () => {
 
     const created = createInvoice(
       {
-        contactId,
-        contactName,
-        contactEmail: contactEmail || 'client@example.com',
+        contactId: finalContactId,
+        contactName: cleanName,
+        contactEmail: finalEmail,
         items: formattedItems,
         subtotal,
         taxPct: 0,
@@ -104,23 +109,33 @@ export const NewInvoiceModal: React.FC = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-4 flex-1">
-          {/* Client selector */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
+          {/* Client text input & Due date */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="sm:col-span-2">
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                Select Client
+                Client / Company Name *
               </label>
-              <select
-                value={contactId}
-                onChange={(e) => handleClientSelect(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm outline-none focus:border-blue-500 bg-white"
-              >
-                {state.contacts.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name} — {c.company}
-                  </option>
-                ))}
-              </select>
+              <input
+                type="text"
+                required
+                value={contactName}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setContactName(val);
+                  const matched = state.contacts.find(
+                    (c) =>
+                      c.name.toLowerCase() === val.toLowerCase() ||
+                      c.company.toLowerCase() === val.toLowerCase()
+                  );
+                  if (matched) {
+                    setContactId(matched.id);
+                    if (!contactEmail) setContactEmail(matched.email);
+                  }
+                }}
+                placeholder="Type client or company name..."
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+                id="invoice-client-name-input"
+              />
             </div>
 
             <div>
@@ -132,9 +147,24 @@ export const NewInvoiceModal: React.FC = () => {
                 required
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm outline-none focus:border-blue-500"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                id="invoice-due-date-input"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
+              Client Email Address (for Payment Link)
+            </label>
+            <input
+              type="email"
+              value={contactEmail}
+              onChange={(e) => setContactEmail(e.target.value)}
+              placeholder="e.g. accounting@clientcompany.com"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+              id="invoice-client-email-input"
+            />
           </div>
 
           {/* Line Items */}
