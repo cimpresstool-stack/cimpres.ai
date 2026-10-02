@@ -77,14 +77,12 @@ export const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
     ...(isAdmin
       ? [
           {
-            title: 'Platform Governance',
+            title: 'Management',
             items: [
               {
                 id: 'admin',
-                label: 'Admin Control Center',
+                label: 'Operations & Activity',
                 icon: ShieldCheck,
-                badge: 'Super Admin',
-                badgeColor: 'bg-purple-500/25 text-purple-300 border border-purple-500/30',
               },
             ],
           },
@@ -213,7 +211,7 @@ export const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                   }
                 }}
                 className={`flex items-center gap-2.5 min-w-0 ${isAdmin ? 'cursor-pointer hover:opacity-90' : ''}`}
-                title={isAdmin ? 'View Admin Control Center' : 'Active Business Account'}
+                title="Account Profile"
               >
                 <div
                   className={`w-8 h-8 rounded-lg font-black text-xs flex items-center justify-center shrink-0 text-white ${
@@ -225,20 +223,9 @@ export const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                   {currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
                 </div>
                 <div className="min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <p className="text-xs font-bold text-white truncate">
-                      {currentUser?.name || 'Finance Lead'}
-                    </p>
-                    <span
-                      className={`text-[9px] font-bold px-1.5 py-0.2 rounded uppercase tracking-wider shrink-0 ${
-                        isAdmin
-                          ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                          : 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
-                      }`}
-                    >
-                      {isAdmin ? 'Admin' : 'Owner'}
-                    </span>
-                  </div>
+                  <p className="text-xs font-bold text-white truncate">
+                    {currentUser?.name || 'Finance Lead'}
+                  </p>
                   <p className="text-[10px] text-slate-400 truncate">
                     {currentUser?.companyName || 'Cimpres Global'}
                   </p>

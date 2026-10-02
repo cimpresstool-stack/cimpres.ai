@@ -1074,7 +1074,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       setIsAuthModalOpen(false);
       setIsLandingPageActive(false);
-      showToast(`Welcome back, ${profile.name}! (${profile.role === 'admin' ? 'Administrator' : 'Business Owner'})`);
+      showToast(`Welcome back, ${profile.name}!`);
     } finally {
       setAuthLoading(false);
     }
@@ -1133,7 +1133,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setIsAuthModalOpen(false);
       setIsLandingPageActive(false);
       confetti({ particleCount: 90, spread: 75, origin: { y: 0.6 } });
-      showToast(`Welcome ${cleanName}! Registered as ${profile.role === 'admin' ? 'Administrator' : 'Business Owner'}.`);
+      showToast(`Welcome ${cleanName}! Your workspace is active and ready.`);
     } finally {
       setAuthLoading(false);
     }
@@ -1164,9 +1164,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       userName: demoUser.name,
       companyName: demoUser.companyName,
       action: 'login',
-      details: 'Started Instant Demo session (Administrator Access)',
+      details: 'Started Instant Demo session',
     }).catch(() => {});
-    showToast('Instant Demo session started! Administrator privileges active.');
+    showToast('Instant Demo session started! All features available.');
   };
 
   const logout = async () => {
