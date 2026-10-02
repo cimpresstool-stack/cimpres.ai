@@ -36,6 +36,7 @@ import {
   formatCompactCurrency,
 } from '../data/constants';
 import { AccountKey } from '../types';
+import { DashboardCrmSection } from './dashboard/DashboardCrmSection';
 
 export const DashboardView: React.FC = () => {
   const {
@@ -648,6 +649,9 @@ export const DashboardView: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Embedded Full-Featured CRM & Client Lead Hub */}
+      <DashboardCrmSection />
     </div>
   );
 };

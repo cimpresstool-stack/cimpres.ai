@@ -50,7 +50,7 @@ export const LandingPage: React.FC = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   // Active feature tab
-  const [activeFeatureTab, setActiveFeatureTab] = useState<'distribution' | 'invoicing' | 'paylinks' | 'reporting'>('distribution');
+  const [activeFeatureTab, setActiveFeatureTab] = useState<'distribution' | 'crm' | 'invoicing' | 'paylinks' | 'reporting'>('distribution');
 
   const handleAmountSelect = (val: number) => {
     setSimulatorAmount(val);
@@ -98,6 +98,10 @@ export const LandingPage: React.FC = () => {
     {
       q: 'How does automated invoicing and instant payment collection work?',
       a: 'You can generate professional itemized invoices in seconds and send one-click shareable payment links to your clients via Email, SMS, or WhatsApp. When an invoice is paid, Cimpres logs the transaction and automatically splits the funds into your 8 reserve accounts.',
+    },
+    {
+      q: 'Does Cimpres include built-in CRM and lead pipeline tools?',
+      a: 'Yes! Cimpres includes a fully-functional CRM to track your contacts, qualify inbound leads, schedule client follow-up tasks, and advance deals across a visual 5-stage pipeline. When a deal is marked "Won", Cimpres automatically generates the invoice with a payment link and routes incoming revenue into your 8 reserve accounts the moment it is paid.',
     },
     {
       q: 'Do I need to enter credit card details to start or test drive?',
@@ -217,7 +221,7 @@ export const LandingPage: React.FC = () => {
 
             {/* Subhead */}
             <p className="text-lg sm:text-xl text-slate-300 leading-relaxed font-normal mb-8">
-              Traditional accounting looks backwards at history. <strong className="text-white font-semibold">Cimpres</strong> is <span className="text-emerald-400 font-bold">100% free</span> and automatically splits every client payment across <span className="text-blue-400 font-semibold">8 dedicated reserves</span> in real time—locking in founder profit first, protecting payroll and taxes, automating invoices, and ending cash flow surprises forever.
+              Traditional accounting looks backwards at history. <strong className="text-white font-semibold">Cimpres</strong> is <span className="text-emerald-400 font-bold">100% free</span> and combines a full-featured <span className="text-blue-400 font-semibold">CRM & Client Pipeline</span> with an automated <span className="text-blue-400 font-semibold">8-Account Allocation Engine</span> in real time—locking in founder profit first, protecting payroll and taxes, automating invoicing, and ending cash flow surprises forever.
             </p>
 
             {/* Dual CTAs */}
@@ -246,6 +250,10 @@ export const LandingPage: React.FC = () => {
               <div className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                 <span>100% Free forever</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <span>Integrated CRM & Leads</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400" />
@@ -598,6 +606,7 @@ export const LandingPage: React.FC = () => {
             <div className="flex flex-wrap items-center justify-center gap-2 mt-8">
               {[
                 { id: 'distribution', label: '8-Account Distribution', icon: PieChart },
+                { id: 'crm', label: 'CRM & Deal Pipeline', icon: Users },
                 { id: 'invoicing', label: 'Automated Invoicing', icon: Receipt },
                 { id: 'paylinks', label: 'Payment Links & Settlement', icon: CreditCard },
                 { id: 'reporting', label: 'Real-Time Financial Reports', icon: BarChart3 },
@@ -678,6 +687,92 @@ export const LandingPage: React.FC = () => {
                       <span className="text-xs font-extrabold text-blue-400">{acc.defaultPct}%</span>
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {activeFeatureTab === 'crm' && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                <div>
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-xs font-bold mb-4">
+                    <span>UNIFIED RELATIONSHIP MANAGEMENT</span>
+                  </div>
+                  <h4 className="text-2xl font-black text-white mb-4">
+                    Integrated CRM & Visual Sales Pipeline
+                  </h4>
+                  <p className="text-slate-300 text-sm leading-relaxed mb-6">
+                    Manage client contacts, qualify inbound leads, schedule follow-ups, and advance deals across a visual 5-stage pipeline. The instant a deal is won, Cimpres automatically generates the invoice and splits the cash when paid.
+                  </p>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3 text-sm text-slate-300">
+                      <Check className="w-4 h-4 text-emerald-400" />
+                      <span>Contact directory with lifetime value (LTV) and on-time payment tracking</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm text-slate-300">
+                      <Check className="w-4 h-4 text-emerald-400" />
+                      <span>Visual 5-stage deal Kanban board (Lead → Discovery → Proposal → Terms → Won)</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm text-slate-300">
+                      <Check className="w-4 h-4 text-emerald-400" />
+                      <span>Zero duplicate entry: Won deals auto-generate invoices with payment links</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm text-slate-300">
+                      <Check className="w-4 h-4 text-emerald-400" />
+                      <span>Follow-up action checklist and client estimate quotes built right in</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => openAuthModal('signup')}
+                    className="mt-8 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm transition cursor-pointer"
+                  >
+                    <span>Launch Free CRM Cockpit</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <div className="bg-slate-950 p-6 rounded-2xl border border-slate-800 space-y-3">
+                  <div className="flex justify-between items-center text-xs pb-2 border-b border-slate-800 font-semibold">
+                    <span className="text-white flex items-center gap-1.5">
+                      <Users className="w-4 h-4 text-blue-400" />
+                      CRM Pipeline & Client Snapshot
+                    </span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400">
+                      Live Unified Engine
+                    </span>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-sm text-white">Sarah Jenkins</span>
+                        <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300">VIP Client</span>
+                      </div>
+                      <p className="text-xs text-slate-400">Apex Creative Studio • sarah@apexdigital.io</p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-xs font-black text-emerald-400 font-mono">$48,500 LTV</span>
+                      <p className="text-[10px] text-slate-400">100% on-time</p>
+                    </div>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-sm text-white">Marcus Brody</span>
+                        <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-300">Customer</span>
+                      </div>
+                      <p className="text-xs text-slate-400">Brody Logistics • mbrody@brodytech.com</p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-xs font-black text-emerald-400 font-mono">$24,200 LTV</span>
+                      <p className="text-[10px] text-slate-400">100% on-time</p>
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-blue-950/40 border border-blue-500/30 rounded-xl text-xs flex items-center justify-between">
+                    <span className="text-slate-300">Active Pipeline Value:</span>
+                    <span className="font-extrabold text-blue-300 font-mono">$92,400 Across 5 Stages</span>
+                  </div>
                 </div>
               </div>
             )}

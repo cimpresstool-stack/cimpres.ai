@@ -14,6 +14,9 @@ import {
   Globe,
   LogOut,
   Sparkles,
+  Users,
+  KanbanSquare,
+  CheckSquare,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { formatCompactCurrency } from '../data/constants';
@@ -72,6 +75,32 @@ export const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
           badgeColor: 'bg-emerald-100 text-emerald-800',
         },
         { id: 'paylinks', label: 'Payment Links', icon: Link2 },
+      ],
+    },
+    {
+      title: 'CRM & Client Pipeline',
+      items: [
+        {
+          id: 'clients',
+          label: 'Contacts & Leads',
+          icon: Users,
+          badge: state.contacts.length > 0 ? state.contacts.length : undefined,
+          badgeColor: 'bg-blue-100 text-blue-800',
+        },
+        {
+          id: 'pipeline',
+          label: 'Sales Deal Pipeline',
+          icon: KanbanSquare,
+          badge: state.deals.filter((d) => d.stage !== 'lost').length > 0 ? state.deals.filter((d) => d.stage !== 'lost').length : undefined,
+          badgeColor: 'bg-purple-100 text-purple-800',
+        },
+        {
+          id: 'tasks',
+          label: 'Client Follow-ups',
+          icon: CheckSquare,
+          badge: state.tasks.filter((t) => !t.done).length > 0 ? `${state.tasks.filter((t) => !t.done).length} due` : undefined,
+          badgeColor: 'bg-amber-100 text-amber-800',
+        },
       ],
     },
     ...(isAdmin

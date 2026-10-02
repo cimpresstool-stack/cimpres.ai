@@ -9,6 +9,9 @@ import { FinancialReportingView } from './components/FinancialReportingView';
 import { PaymentLinksView } from './components/PaymentLinksView';
 import { SettingsView } from './components/SettingsView';
 import { AdminControlView } from './components/AdminControlView';
+import { ClientsView } from './components/ClientsView';
+import { PipelineView } from './components/PipelineView';
+import { TasksView } from './components/TasksView';
 import { LandingPage } from './components/landing/LandingPage';
 
 // Modals
@@ -18,6 +21,8 @@ import { InvoicePreviewModal } from './components/modals/InvoicePreviewModal';
 import { AuthModal } from './components/modals/AuthModal';
 import { ResetConfirmModal } from './components/modals/ResetConfirmModal';
 import { AdjustBalanceModal } from './components/modals/AdjustBalanceModal';
+import { NewClientModal } from './components/modals/NewClientModal';
+import { NewDealModal } from './components/modals/NewDealModal';
 
 const AppContent: React.FC = () => {
   const { activeTab, toastMessage, isLandingPageActive } = useApp();
@@ -63,6 +68,9 @@ const AppContent: React.FC = () => {
             <CashFlowView />
           )}
           {activeTab === 'invoices' && <InvoicingView />}
+          {activeTab === 'clients' && <ClientsView />}
+          {activeTab === 'pipeline' && <PipelineView />}
+          {activeTab === 'tasks' && <TasksView />}
           {activeTab === 'reports' && <FinancialReportingView />}
           {(activeTab === 'payment-links' || activeTab === 'paylinks') && <PaymentLinksView />}
           {activeTab === 'settings' && <SettingsView />}
@@ -77,6 +85,8 @@ const AppContent: React.FC = () => {
       <AuthModal />
       <ResetConfirmModal />
       <AdjustBalanceModal />
+      <NewClientModal />
+      <NewDealModal />
 
       {/* Toast Notification Alert */}
       {toastMessage && (
