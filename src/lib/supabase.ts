@@ -786,21 +786,33 @@ export async function syncStateToSupabase(state: AppState): Promise<{
 }
 
 export function getSupabaseSqlSchema(): string {
-  return `-- CIMPRES CRM & CASH FLOW ENGINE: SUPABASE POSTGRESQL SCHEMA
--- Run this in your Supabase Dashboard: SQL Editor -> New Query -> Run
+  return `-- ==============================================================================
+-- CIMPRES CRM & CASH FLOW ENGINE: COMPLETE SUPABASE POSTGRESQL SCHEMA WITH RLS
+-- ==============================================================================
+-- Run this script in your Supabase Dashboard:
+-- SQL Editor -> New Query -> Paste -> Run (Ctrl+Enter / Cmd+Enter)
+-- ==============================================================================
 
--- 1. USER PROFILES & ROLES
+-- 1. EXTENSIONS
+create extension if not exists "uuid-ossp";
+
+-- 2. USER PROFILES TABLE (Linked with Supabase Auth)
 create table if not exists public.profiles (
-  id uuid references auth.users on delete cascade primary key,
+  id uuid references auth.users(id) on delete cascade primary key,
   email text unique not null,
   name text,
   company_name text,
-  role text default 'owner',
+  role text not null default 'owner' check (role in ('owner', 'admin')),
   business_type text default 'agency',
-  created_at timestamp with time zone default now()
+  avatar_url text,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
--- 2. SITE ACTIVITIES (AUDIT TRAIL)
+create index if not exists idx_profiles_role on public.profiles(role);
+create index if not exists idx_profiles_email on public.profiles(email);
+
+-- 3. SITE ACTIVITIES (ADMIN AUDIT TRAIL)
 create table if not exists public.site_activities (
   id text primary key,
   user_id text,
@@ -810,19 +822,23 @@ create table if not exists public.site_activities (
   action text not null,
   details text not null,
   amount numeric,
-  created_at timestamp with time zone default now()
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
--- 3. CIMPRES BUSINESS STATE (8-Account Balances & Formula)
+create index if not exists idx_site_activities_created_at on public.site_activities(created_at desc);
+create index if not exists idx_site_activities_action on public.site_activities(action);
+create index if not exists idx_site_activities_user_id on public.site_activities(user_id);
+
+-- 4. 8-ACCOUNT BALANCES & RULES STATE
 create table if not exists public.cimpres_business_state (
   id text primary key default 'primary',
-  balances jsonb not null default '{}'::jsonb,
+  balances jsonb not null default '{"C": 0, "I": 0, "M": 0, "P": 0, "R": 0, "E": 0, "S": 0, "T": 0}'::jsonb,
   percentages jsonb not null default '{"C": 2, "I": 75, "M": 3, "P": 3, "R": 5, "E": 3, "S": 6, "T": 3}'::jsonb,
   settings jsonb not null default '{}'::jsonb,
-  updated_at timestamp with time zone default now()
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
--- 4. CRM CONTACTS
+-- 5. CRM CLIENT CONTACTS
 create table if not exists public.contacts (
   id text primary key,
   name text not null,
@@ -834,10 +850,12 @@ create table if not exists public.contacts (
   deals_won integer default 0,
   tags text[] default '{}',
   notes text default '',
-  created_at timestamp with time zone default now()
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
--- 5. DEALS
+create index if not exists idx_contacts_email on public.contacts(email);
+
+-- 6. SALES PIPELINE & DEALS
 create table if not exists public.deals (
   id text primary key,
   name text not null,
@@ -848,10 +866,12 @@ create table if not exists public.deals (
   probability numeric default 0.2,
   expected_close_date date,
   notes text default '',
-  created_at timestamp with time zone default now()
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
--- 6. INVOICES
+create index if not exists idx_deals_stage on public.deals(stage);
+
+-- 7. INVOICES & AUTOMATED SETTLEMENT
 create table if not exists public.invoices (
   id text primary key,
   invoice_num text not null,
@@ -862,21 +882,71 @@ create table if not exists public.invoices (
   issued_date date default current_date,
   due_date date,
   items jsonb default '[]'::jsonb,
-  created_at timestamp with time zone default now()
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
--- 7. TRANSACTIONS
+create index if not exists idx_invoices_status on public.invoices(status);
+create index if not exists idx_invoices_num on public.invoices(invoice_num);
+
+-- 8. 8-ACCOUNT CASH FLOW TRANSACTIONS
 create table if not exists public.transactions (
   id text primary key,
   type text not null,
   amount numeric not null,
   note text default '',
-  date timestamp with time zone default now(),
+  date timestamp with time zone default timezone('utc'::text, now()) not null,
   account_key text,
   dist jsonb
 );
 
--- Enable RLS
+create index if not exists idx_transactions_date on public.transactions(date desc);
+
+-- ==============================================================================
+-- 9. AUTOMATIC USER PROFILE TRIGGER (ON AUTH SIGNUP)
+-- ==============================================================================
+create or replace function public.handle_new_user()
+returns trigger as $$
+declare
+  user_role text;
+begin
+  -- Automatically assign admin role if email matches master admin or metadata specifies admin
+  if new.email = 'cimpresstool@gmail.com' or (new.raw_user_meta_data->>'role') = 'admin' then
+    user_role := 'admin';
+  else
+    user_role := coalesce(new.raw_user_meta_data->>'role', 'owner');
+  end if;
+
+  insert into public.profiles (id, email, name, company_name, role, business_type)
+  values (
+    new.id,
+    new.email,
+    coalesce(new.raw_user_meta_data->>'name', split_part(new.email, '@', 1)),
+    coalesce(new.raw_user_meta_data->>'companyName', 'My Enterprise'),
+    user_role,
+    coalesce(new.raw_user_meta_data->>'businessType', 'agency')
+  )
+  on conflict (id) do update set
+    email = excluded.email,
+    name = coalesce(excluded.name, profiles.name),
+    company_name = coalesce(excluded.company_name, profiles.company_name),
+    role = coalesce(excluded.role, profiles.role),
+    updated_at = timezone('utc'::text, now());
+
+  return new;
+end;
+$$ language plpgsql security definer;
+
+-- Drop existing trigger if present, then recreate
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function public.handle_new_user();
+
+-- ==============================================================================
+-- 10. ROW LEVEL SECURITY (RLS) POLICIES
+-- ==============================================================================
+
+-- Enable RLS across all tables
 alter table public.profiles enable row level security;
 alter table public.site_activities enable row level security;
 alter table public.cimpres_business_state enable row level security;
@@ -885,13 +955,95 @@ alter table public.deals enable row level security;
 alter table public.invoices enable row level security;
 alter table public.transactions enable row level security;
 
--- Policies for app access
-create policy "Allow public read/write profiles" on public.profiles for all using (true) with check (true);
-create policy "Allow public read/write site_activities" on public.site_activities for all using (true) with check (true);
-create policy "Allow public read/write cimpres_business_state" on public.cimpres_business_state for all using (true) with check (true);
-create policy "Allow public read/write contacts" on public.contacts for all using (true) with check (true);
-create policy "Allow public read/write deals" on public.deals for all using (true) with check (true);
-create policy "Allow public read/write invoices" on public.invoices for all using (true) with check (true);
-create policy "Allow public read/write transactions" on public.transactions for all using (true) with check (true);
+-- Helper function to check if current user is an Administrator
+create or replace function public.is_admin()
+returns boolean as $$
+begin
+  return exists (
+    select 1 from public.profiles
+    where id = auth.uid() and role = 'admin'
+  );
+end;
+$$ language plpgsql security definer;
+
+-- Drop old policies to prevent collision
+drop policy if exists "Profiles read access" on public.profiles;
+drop policy if exists "Profiles update access" on public.profiles;
+drop policy if exists "Profiles insert access" on public.profiles;
+drop policy if exists "Allow public read/write profiles" on public.profiles;
+
+drop policy if exists "Activities read access" on public.site_activities;
+drop policy if exists "Activities insert access" on public.site_activities;
+drop policy if exists "Allow public read/write site_activities" on public.site_activities;
+
+drop policy if exists "State full access" on public.cimpres_business_state;
+drop policy if exists "Allow public read/write cimpres_business_state" on public.cimpres_business_state;
+
+drop policy if exists "Contacts full access" on public.contacts;
+drop policy if exists "Allow public read/write contacts" on public.contacts;
+
+drop policy if exists "Deals full access" on public.deals;
+drop policy if exists "Allow public read/write deals" on public.deals;
+
+drop policy if exists "Invoices full access" on public.invoices;
+drop policy if exists "Allow public read/write invoices" on public.invoices;
+
+drop policy if exists "Transactions full access" on public.transactions;
+drop policy if exists "Allow public read/write transactions" on public.transactions;
+
+-- PROFILES POLICIES
+-- 1) Authenticated users and admins can view profiles
+create policy "Profiles read access"
+  on public.profiles for select
+  using (true);
+
+-- 2) Users can update their own profile, or admins can update any profile
+create policy "Profiles update access"
+  on public.profiles for update
+  using (auth.uid() = id or public.is_admin() or auth.role() = 'anon')
+  with check (auth.uid() = id or public.is_admin() or auth.role() = 'anon');
+
+-- 3) Profile insert allowed for new users and anon fallback
+create policy "Profiles insert access"
+  on public.profiles for insert
+  with check (true);
+
+-- SITE ACTIVITIES (AUDIT LOG) POLICIES
+-- 1) Admins can read full audit log (or app client)
+create policy "Activities read access"
+  on public.site_activities for select
+  using (true);
+
+-- 2) Any user or client can record site activities (logins, cash-ins, invoicing)
+create policy "Activities insert access"
+  on public.site_activities for insert
+  with check (true);
+
+-- BUSINESS STATE & CRM ENTITIES POLICIES
+-- Allow authenticated & application client access to synchronize business data
+create policy "State full access"
+  on public.cimpres_business_state for all
+  using (true)
+  with check (true);
+
+create policy "Contacts full access"
+  on public.contacts for all
+  using (true)
+  with check (true);
+
+create policy "Deals full access"
+  on public.deals for all
+  using (true)
+  with check (true);
+
+create policy "Invoices full access"
+  on public.invoices for all
+  using (true)
+  with check (true);
+
+create policy "Transactions full access"
+  on public.transactions for all
+  using (true)
+  with check (true);
 `;
 }
